@@ -1,0 +1,2 @@
+[build]
+rustflags = ["-A", "clippy::tabs_in_doc_comments"]
