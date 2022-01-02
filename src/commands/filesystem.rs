@@ -18,8 +18,8 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(&mut self) {
-		self.sub.run();
+	fn run(&mut self, dev: crate::presence::Presence<crate::device::Device>) {
+		self.sub.run(dev);
 	}
 }
 
@@ -48,17 +48,17 @@ enum Commands {
 }
 
 impl Runnable for Commands {
-	fn run(&mut self) {
+	fn run(&mut self, dev: crate::presence::Presence<crate::device::Device>) {
 		match self {
-			Commands::Cat(args) => args.run(),
-			Commands::Cp(args) => args.run(),
-			Commands::Edit(args) => args.run(),
-			Commands::Info(args) => args.run(),
-			Commands::Mount(args) => args.run(),
-			Commands::Mv(args) => args.run(),
-			Commands::Pull(args) => args.run(),
-			Commands::Push(args) => args.run(),
-			Commands::Rm(args) => args.run(),
+			Commands::Cat(args) => args.run(dev),
+			Commands::Cp(args) => args.run(dev),
+			Commands::Edit(args) => args.run(dev),
+			Commands::Info(args) => args.run(dev),
+			Commands::Mount(args) => args.run(dev),
+			Commands::Mv(args) => args.run(dev),
+			Commands::Pull(args) => args.run(dev),
+			Commands::Push(args) => args.run(dev),
+			Commands::Rm(args) => args.run(dev),
 		}
 	}
 }

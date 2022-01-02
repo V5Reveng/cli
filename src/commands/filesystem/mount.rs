@@ -1,3 +1,5 @@
+#![cfg(target_os = "linux")]
+
 use crate::commands::Runnable;
 use std::path::PathBuf;
 
@@ -7,7 +9,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(&mut self) {
-		unimplemented!();
+	fn run(&mut self, dev: crate::presence::Presence<crate::device::Device>) {
+		todo!();
 	}
 }
