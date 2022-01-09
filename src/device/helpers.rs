@@ -1,8 +1,4 @@
-use bincode::{
-	de::Decoder,
-	error::{AllowedEnumVariants, DecodeError},
-	Decode, Encode,
-};
+use encde::{Decode, Encode};
 
 #[derive(Encode, Decode, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ShortVersion {
@@ -59,67 +55,34 @@ impl std::cmp::PartialOrd<LongVersion> for ShortVersion {
 	}
 }
 
-pub enum Product {
-	/// Identified by 0x10
-	Brain,
-	/// Identified by 0x11
-	Controller {
-		/// If the controller is connected to a brain.
-		connected: bool,
-	},
+#[derive(Decode)]
+pub struct BrainFlags(u8);
+impl BrainFlags {
+	// empty
 }
 
-impl Decode for Product {
-	fn decode<D: Decoder>(decoder: D) -> Result<Self, DecodeError> {
-		// [product, flags]
-		let data = <[u8; 2]>::decode(decoder)?;
-		match data[0] {
-			0x10 => Ok(Product::Brain), // flags is ignored
-			0x11 => Ok(Product::Controller {
-				connected: crate::util::has_bit(data[1].into(), 1),
-			}),
-			found => Err(DecodeError::UnexpectedVariant {
-				type_name: "Product",
-				allowed: AllowedEnumVariants::Allowed(&[0x10, 0x11]),
-				found: found.into(),
-			}),
-		}
+#[derive(Decode)]
+pub struct ControllerFlags(u8);
+impl ControllerFlags {
+	pub fn connected(&self) -> bool {
+		self.0 & 0b10 == 0b10
 	}
+}
+
+#[derive(Decode)]
+#[repr(u8)]
+pub enum Product {
+	#[encde(wire_tag = 0x10)]
+	Brain(BrainFlags),
+	#[encde(wire_tag = 0x11)]
+	Controller(ControllerFlags),
 }
 
 impl std::fmt::Display for Product {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			Self::Brain => f.write_str("brain"),
-			Self::Controller { connected } => write!(f, "controller (connected: {})", connected),
+			Self::Brain(_) => f.write_str("brain"),
+			Self::Controller(flags) => write!(f, "controller (connected: {})", flags.connected()),
 		}
 	}
-}
-
-// https://stackoverflow.com/a/64651623
-/// A zero-sized type that will be decoded as if it has the size `SIZE`, but without keeping the data. That is, it skips `SIZE` bytes in the stream.
-///
-/// For example:
-///
-/// ```
-/// use bincode::Decode;
-/// #[derive(Decode)]
-/// struct Something {
-/// 	actual_field: u32,
-/// 	_1: Padding<3>,
-/// 	another_actual_field: u8,
-/// }
-/// ```
-///
-/// This declares that there are three bytes of padding after the u32 and before the u8.
-pub struct Padding<const SIZE: usize>(());
-impl<const SIZE: usize> Decode for Padding<SIZE> {
-	fn decode<D: Decoder>(decoder: D) -> Result<Self, DecodeError> {
-		<[u8; SIZE]>::decode(decoder)?;
-		Ok(Padding(()))
-	}
-}
-
-pub fn config() -> bincode::config::Configuration<bincode::config::LittleEndian, bincode::config::Fixint, bincode::config::SkipFixedArrayLength, bincode::config::NoLimit> {
-	bincode::config::Configuration::standard().with_little_endian().with_fixed_int_encoding().skip_fixed_array_length().with_no_limit()
 }

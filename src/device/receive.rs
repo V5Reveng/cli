@@ -1,31 +1,31 @@
-use super::helpers::{LongVersion, Padding, Product, ShortVersion};
-use bincode::Decode;
+use super::helpers::{LongVersion, Product, ShortVersion};
+use encde::Decode;
 
 #[derive(Decode)]
 pub struct DeviceInfo {
 	pub version: LongVersion,
+	#[encde(pad_after = 1)]
 	pub product: Product,
-	_1: Padding<1>,
 }
 
 #[derive(Decode)]
 pub struct ExtendedDeviceInfo {
-	_1: Padding<1>,
+	#[encde(pad_before = 1)]
 	pub system_version: ShortVersion,
 	pub cpu0_version: ShortVersion,
+	#[encde(pad_after = 3)]
 	pub cpu1_version: ShortVersion,
-	_2: Padding<3>,
 	pub touch_version: u8,
+	#[encde(pad_after = 12)]
 	pub system_id: u32,
-	_3: Padding<12>,
 }
 
 #[derive(Decode)]
 pub struct ExtendedDeviceInfoNew {
-	common: ExtendedDeviceInfo,
+	pub common: ExtendedDeviceInfo,
 	/// This data is ignored by pros-cli so there's no way to know what it actually is.
+	#[encde(pad_after = 3)]
 	pub unknown: u8,
-	_1: Padding<3>,
 }
 
 impl From<ExtendedDeviceInfoNew> for ExtendedDeviceInfo {

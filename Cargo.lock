@@ -50,24 +50,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
-name = "bincode"
-version = "2.0.0-alpha.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36d1c3abc6974e716eb17169ba868ebb206f17eebac8f73fc93c5bc6369d6387"
-dependencies = [
- "bincode_derive",
-]
-
-[[package]]
-name = "bincode_derive"
-version = "2.0.0-alpha.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd04dcdd8fbae0cd3b6912637fbe7163e13d009c5b1c3c553d1fe3385f5f5025"
-dependencies = [
- "virtue",
-]
-
-[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -115,6 +97,23 @@ checksum = "a86d4ec799f94ddc4a4a4edf652f89b360219905f86edcb8abe5974dfef135b8"
 dependencies = [
  "heck",
  "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "encde"
+version = "0.1.0"
+dependencies = [
+ "encde_derive",
+ "paste",
+]
+
+[[package]]
+name = "encde_derive"
+version = "0.1.0"
+dependencies = [
  "proc-macro2",
  "quote",
  "syn",
@@ -282,6 +281,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "paste"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0744126afe1a6dd7f394cb50a716dbe086cb06e255e53d8d0185d82828358fb5"
+
+[[package]]
 name = "pkg-config"
 version = "0.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -360,9 +365,8 @@ checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
 name = "reveng-cli"
 version = "0.1.0"
 dependencies = [
- "bincode",
- "bincode_derive",
  "clap",
+ "encde",
  "env_logger",
  "log",
  "num_enum",
@@ -488,12 +492,6 @@ name = "version_check"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5fecdca9a5291cc2b8dcf7dc02453fee791a280f3743cb0905f8822ae463b3fe"
-
-[[package]]
-name = "virtue"
-version = "0.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa5fb1e589cca7a10d503c459ae06040afafde66a50dea2e86dfbbcaf170eac1"
 
 [[package]]
 name = "void"

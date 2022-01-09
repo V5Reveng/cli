@@ -74,8 +74,7 @@ pub enum ProtocolError {
 pub enum DeviceError {
 	IO(std::io::Error),
 	Serial(SerialError),
-	Encode(bincode::error::EncodeError),
-	Decode(bincode::error::DecodeError),
+	Encde(encde::Error),
 	Protocol(ProtocolError),
 }
 
@@ -94,14 +93,9 @@ impl From<serialport::Error> for DeviceError {
 		}
 	}
 }
-impl From<bincode::error::EncodeError> for DeviceError {
-	fn from(err: bincode::error::EncodeError) -> Self {
-		Self::Encode(err)
-	}
-}
-impl From<bincode::error::DecodeError> for DeviceError {
-	fn from(err: bincode::error::DecodeError) -> Self {
-		Self::Decode(err)
+impl From<encde::Error> for DeviceError {
+	fn from(err: encde::Error) -> Self {
+		Self::Encde(err)
 	}
 }
 impl From<ProtocolError> for DeviceError {
@@ -155,14 +149,14 @@ impl std::fmt::Display for ResponseByte {
 }
 
 impl Device {
-	fn rx<T: bincode::Decode + std::fmt::Debug>(&mut self) -> Result<T> {
-		let ret = bincode::decode_from_std_read(&mut self.port, helpers::config())?;
+	fn rx<T: encde::Decode + std::fmt::Debug>(&mut self) -> Result<T> {
+		let ret = encde::Decode::decode(&mut self.port)?;
 		trace!("rx {}: {:?}", type_name::<T>(), ret);
 		Ok(ret)
 	}
-	fn tx<T: bincode::Encode + std::fmt::Debug>(&mut self, data: &T) -> Result<()> {
+	fn tx<T: encde::Encode + std::fmt::Debug>(&mut self, data: &T) -> Result<()> {
 		trace!("tx {}: {:?}", type_name::<T>(), data);
-		bincode::encode_into_std_write(data, &mut self.port, helpers::config())?;
+		encde::Encode::encode(data, &mut self.port)?;
 		Ok(())
 	}
 	fn rx_raw_data<const N: usize>(&mut self) -> Result<[u8; N]> {
@@ -229,19 +223,10 @@ impl Device {
 		let payload_length = self.rx_simple_payload_length()?;
 		self.rx_bytes(payload_length)
 	}
-	fn decode_from_data<T: bincode::Decode>(data: &[u8]) -> Result<T> {
-		let ret = bincode::decode_from_slice(data, helpers::config())?;
-		if ret.1 != data.len() {
-			// not all data was read
-			Err(DeviceError::Protocol(ProtocolError::BadLength {
-				entity: "payload",
-				received_length: data.len(),
-			}))
-		} else {
-			Ok(ret.0)
-		}
+	fn decode_from_data<T: encde::Decode>(data: &[u8]) -> Result<T> {
+		Ok(encde::util::decode_from_entire_slice(data)?)
 	}
-	fn rx_simple_payload<T: bincode::Decode>(&mut self) -> Result<T> {
+	fn rx_simple_payload<T: encde::Decode>(&mut self) -> Result<T> {
 		debug!("rx simple payload");
 		let raw = self.rx_simple_raw_payload()?;
 		Self::decode_from_data(&raw)
@@ -280,13 +265,13 @@ impl Device {
 			})),
 		}
 	}
-	fn rx_expect<T: bincode::Decode + bincode::Encode + PartialEq + std::fmt::Debug>(&mut self, entity: &'static str, expected: &T) -> Result<()> {
+	fn rx_expect<T: encde::Decode + encde::Encode + PartialEq + std::fmt::Debug>(&mut self, entity: &'static str, expected: &T) -> Result<()> {
 		let received = self.rx::<T>()?;
 		if &received != expected {
 			Err(DeviceError::Protocol(ProtocolError::WrongData {
 				entity,
-				expected: bincode::encode_to_vec(expected, helpers::config())?.into(),
-				received: bincode::encode_to_vec(received, helpers::config())?.into(),
+				expected: encde::util::encode_to_vec(expected)?.into(),
+				received: encde::util::encode_to_vec(&received)?.into(),
 			}))
 		} else {
 			Ok(())
@@ -317,7 +302,7 @@ impl Device {
 		self.tx(&command_id)?;
 		Ok(())
 	}
-	fn end_simple_command<T: bincode::Decode>(&mut self, command_id: CommandId) -> Result<T> {
+	fn end_simple_command<T: encde::Decode>(&mut self, command_id: CommandId) -> Result<T> {
 		debug!("end simple command {:#02x}", command_id);
 		self.rx_response_header()?;
 		self.rx_echoed_command(command_id)?;
@@ -334,7 +319,7 @@ impl Device {
 		self.port.end_tx_crc()?;
 		Ok(())
 	}
-	fn end_ext_command<T: bincode::Decode>(&mut self, sent_command: CommandId) -> Result<T> {
+	fn end_ext_command<T: encde::Decode>(&mut self, sent_command: CommandId) -> Result<T> {
 		debug!("end extended command {:#02x}", sent_command);
 		self.port.begin_rx_crc();
 		self.rx_response_header()?;
@@ -352,11 +337,11 @@ impl Device {
 }
 
 impl Device {
-	fn simple_command_no_data<T: bincode::Decode>(&mut self, command_id: CommandId) -> Result<T> {
+	fn simple_command_no_data<T: encde::Decode>(&mut self, command_id: CommandId) -> Result<T> {
 		self.begin_simple_command(command_id)?;
 		self.end_simple_command(command_id)
 	}
-	fn ext_command_no_data<T: bincode::Decode>(&mut self, command_id: CommandId) -> Result<T> {
+	fn ext_command_no_data<T: encde::Decode>(&mut self, command_id: CommandId) -> Result<T> {
 		self.begin_ext_command(command_id, &[])?;
 		self.end_ext_command(command_id)
 	}
@@ -376,8 +361,8 @@ impl Device {
 	fn has_new_ext_dev_info(&mut self) -> Result<bool> {
 		let device_info = self.device_info()?;
 		let min_version = match device_info.product {
-			helpers::Product::Brain => helpers::LongVersion::new(1, 0, 13, 0, 0),
-			helpers::Product::Controller { .. } => helpers::LongVersion::new(1, 0, 0, 0, 70),
+			helpers::Product::Brain(_) => helpers::LongVersion::new(1, 0, 13, 0, 0),
+			helpers::Product::Controller(_) => helpers::LongVersion::new(1, 0, 0, 0, 70),
 		};
 		Ok(device_info.version >= min_version)
 	}
