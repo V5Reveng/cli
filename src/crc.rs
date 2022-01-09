@@ -29,6 +29,15 @@ impl CrcComputable for u16 {
 	}
 }
 
+#[cfg(test)]
+mod tests {
+	#[test]
+	fn crc_16() {
+		use super::CrcComputable;
+		assert_eq!(*0u16.update_crc(&[1, 2, 3, 4]), 0x0d03);
+	}
+}
+
 use serialport::SerialPort;
 
 pub struct CRCSerialPort {
