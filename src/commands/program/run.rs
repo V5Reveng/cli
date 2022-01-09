@@ -10,7 +10,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(&mut self, dev: crate::presence::Presence<crate::device::Device>) {
+	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
 		todo!();
 	}
 }

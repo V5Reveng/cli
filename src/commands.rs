@@ -10,7 +10,7 @@ mod filesystem;
 mod program;
 
 trait Runnable {
-	fn run(&mut self, device: Presence<Device>);
+	fn run(self, device: Presence<Device>);
 }
 
 #[derive(clap::Subcommand)]
@@ -21,7 +21,7 @@ enum Subcommand {
 }
 
 impl Runnable for Subcommand {
-	fn run(&mut self, dev: Presence<Device>) {
+	fn run(self, dev: Presence<Device>) {
 		match self {
 			Subcommand::Filesystem(args) => args.run(dev),
 			Subcommand::Program(args) => args.run(dev),
@@ -45,7 +45,7 @@ struct Args {
 }
 
 impl Args {
-	fn run(&mut self) {
+	fn run(self) {
 		logging::set_from_int(self.verbosity);
 		let device = if let Some(ref device_path) = self.device_path {
 			Presence::One(Device::try_from(device_path.as_ref()).expect("Invalid device provided"))

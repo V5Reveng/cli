@@ -4,7 +4,7 @@ use crate::commands::Runnable;
 pub struct Args {}
 
 impl Runnable for Args {
-	fn run(&mut self, dev: crate::presence::Presence<crate::device::Device>) {
+	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
 		let mut dev = dev.expect_one();
 		let dev_info = dev.device_info().unwrap();
 		let ext_dev_info = dev.extended_device_info().unwrap();
