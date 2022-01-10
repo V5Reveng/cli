@@ -1,11 +1,12 @@
 use crate::crc::CRCSerialPort;
 use core::any::type_name;
-use log::{debug, trace};
+use log::{debug, trace, warn};
 use std::io::{Read, Write};
 use std::path::Path;
 use std::time::Duration;
 
 pub mod discover;
+pub mod filesystem;
 mod helpers;
 pub mod receive;
 pub mod send;
@@ -380,5 +381,30 @@ impl Device {
 		} else {
 			self.ext_command_no_data::<receive::ExtendedDeviceInfo>(COMMAND_ID)
 		}
+	}
+
+	pub fn get_file_metadata_by_name(&mut self, args: &send::FileMetadataByName) -> Result<receive::FileMetadataByName> {
+		self.ext_command_with_data::<_, receive::FileMetadataByName>(0x19, args)
+	}
+	pub fn get_file_metadata_by_index(&mut self, index: filesystem::FileIndex) -> Result<receive::FileMetadataByIndex> {
+		self.ext_command_with_data::<_, receive::FileMetadataByIndex>(0x17, &send::FileMetadataByIndex::new(index))
+	}
+
+	pub fn num_files(&mut self, category: filesystem::Category) -> Result<isize> {
+		self.ext_command_with_data::<_, receive::NumFiles>(0x16, &send::NumFiles::new(category)).map(|receive::NumFiles(num)| num as isize)
+	}
+	pub fn list_all_files(&mut self, category: filesystem::Category) -> Result<Vec<receive::FileMetadataByIndex>> {
+		let num_files: usize = self.num_files(category)?.try_into().expect("The number of files was negative");
+		let num_files = if num_files > (u8::MAX as usize) {
+			warn!("There are too many files to list all of them; only listing the first {}", u8::MAX);
+			u8::MAX
+		} else {
+			num_files as u8
+		};
+		let mut ret = Vec::with_capacity(num_files as usize);
+		for i in 0..num_files {
+			ret.push(self.get_file_metadata_by_index(i)?)
+		}
+		Ok(ret)
 	}
 }

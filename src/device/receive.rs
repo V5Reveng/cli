@@ -33,3 +33,32 @@ impl From<ExtendedDeviceInfoNew> for ExtendedDeviceInfo {
 		new.common
 	}
 }
+
+use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, TimeStamp};
+#[derive(Decode, Debug)]
+pub struct FileMetadataByName {
+	/// TODO: find out what this field represents
+	pub linked_category: Category,
+	pub size: FileSize,
+	pub addr: Address,
+	pub crc: u32,
+	pub file_type: FileType,
+	pub timestamp: TimeStamp,
+	pub version: u32,
+	/// TODO: find out what this field represents
+	pub linked_name: FileName,
+}
+#[derive(Decode, Debug)]
+pub struct FileMetadataByIndex {
+	pub idx: FileIndex,
+	pub size: FileSize,
+	pub addr: Address,
+	pub crc: u32,
+	pub file_type: FileType,
+	pub timestamp: TimeStamp,
+	pub version: u32,
+	pub name: FileName,
+}
+
+#[derive(Decode)]
+pub struct NumFiles(pub i16);
