@@ -7,8 +7,8 @@ use std::time::Duration;
 
 pub mod discover;
 mod helpers;
-mod receive;
-mod send;
+pub mod receive;
+pub mod send;
 pub use discover::{UploadableInfo, UploadableType};
 
 const VEX_VENDOR_ID: u16 = 0x2888;
