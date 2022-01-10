@@ -46,7 +46,9 @@ struct Args {
 
 impl Args {
 	fn run(self) {
-		logging::set_from_int(self.verbosity);
+		if self.verbosity > 0 {
+			logging::set_from_int(self.verbosity);
+		}
 		let device = if let Some(ref device_path) = self.device_path {
 			Presence::One(Device::try_from(device_path.as_ref()).expect("Invalid device provided"))
 		} else {
