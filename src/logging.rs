@@ -3,7 +3,6 @@ use log::{Level, LevelFilter, Log, Metadata, Record};
 use phf::phf_map;
 use std::collections::HashMap;
 use std::sync::RwLock;
-use std::time::Instant;
 
 static LEVELS: phf::Map<&'static str, LevelFilter> = phf_map! {
 	"trace" => LevelFilter::Trace,
@@ -95,7 +94,7 @@ impl Log for SimpleLogger {
 		if !Self::actually_enabled(record.level(), record.module_path().and_then(|x| x.strip_prefix(CRATE_PREFIX))) {
 			return;
 		}
-		let time = Instant::now().duration_since(unsafe { BASE_TIMESTAMP }.expect("Logging has not been properly initialized"));
+		let time = unsafe { BASE_TIMESTAMP }.expect("Logging has not been properly initialized").elapsed();
 		eprintln!(
 			"[{time:0>7.3}][{level: >5}][{path: <8}]  {content}",
 			time = time.as_secs_f64(),
