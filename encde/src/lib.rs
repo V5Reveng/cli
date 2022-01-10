@@ -62,7 +62,7 @@ pub enum Error {
 	},
 	/// When decoding an enum, the decoded discriminant did not match the discriminant of any of the enum's variants
 	UnrecognizedEnumDiscriminant {
-		#[doc = "The name of the enum that was being decoded"]
+		/// The name of the enum that was being decoded
 		enum_name: &'static str,
 		/// All the possible discriminants
 		expected: &'static [UnknownSignInt],
