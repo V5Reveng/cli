@@ -69,6 +69,12 @@ pub enum Error {
 		/// The discriminant that was received
 		actual: UnknownSignInt,
 	},
+	/// Data was successfully received but was not valid for the decoded format
+	/// Similar to HTTP response code 415 or 422
+	InvalidFormat {
+		/// The name of the expected format
+		format_name: &'static str,
+	},
 	/// A static custom error
 	Custom(&'static str),
 	/// A dynamic custom error
@@ -77,6 +83,11 @@ pub enum Error {
 impl From<io::Error> for Error {
 	fn from(e: io::Error) -> Self {
 		Self::IO(e)
+	}
+}
+impl From<std::str::Utf8Error> for Error {
+	fn from(_: std::str::Utf8Error) -> Self {
+		Self::InvalidFormat { format_name: "UTF-8" }
 	}
 }
 
