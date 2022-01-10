@@ -345,6 +345,11 @@ impl Device {
 		self.begin_ext_command(command_id, &[])?;
 		self.end_ext_command(command_id)
 	}
+	fn ext_command_with_data<S: encde::Encode, R: encde::Decode>(&mut self, command_id: CommandId, send_data: &S) -> Result<R> {
+		let encoded = encde::util::encode_to_vec(send_data)?;
+		self.begin_ext_command(command_id, &encoded)?;
+		self.end_ext_command(command_id)
+	}
 }
 
 impl Device {
