@@ -1,5 +1,5 @@
 use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, PacketSize, TimeStamp};
-use super::helpers::{LongVersion, Product, ShortVersion};
+use super::helpers::{LongVersion, Product, ShortVersion, SystemID};
 use encde::Decode;
 
 #[derive(Decode)]
@@ -18,7 +18,7 @@ pub struct ExtendedDeviceInfo {
 	pub cpu1_version: ShortVersion,
 	pub touch_version: u8,
 	#[encde(pad_after = 12)]
-	pub system_id: u32,
+	pub system_id: SystemID,
 }
 
 #[derive(Decode)]

@@ -12,7 +12,7 @@ static LEVELS: phf::Map<&'static str, LevelFilter> = phf_map! {
 	"error" => LevelFilter::Error,
 	"off" => LevelFilter::Off,
 };
-static INVALID_LEVEL: &'static str = "Invalid log level provided via REVENG_LOG_LEVEL; valid levels are trace, debug, info, warn, error, off";
+static INVALID_LEVEL: &str = "Invalid log level provided via REVENG_LOG_LEVEL; valid levels are trace, debug, info, warn, error, off";
 
 static mut BASE_TIMESTAMP: Option<std::time::Instant> = None;
 static mut GLOBAL_LEVEL: LevelFilter = if cfg!(debug_assertions) { LevelFilter::Debug } else { LevelFilter::Info };
@@ -70,14 +70,14 @@ pub fn set_from_int(level: usize) {
 	});
 }
 
-static CRATE_PREFIX: &'static str = "reveng_cli::";
+static CRATE_PREFIX: &str = "reveng_cli::";
 
 /// The absolute most simple logger
 /// Logs to stderr and has no local level
 struct SimpleLogger(());
 impl SimpleLogger {
 	fn actually_enabled(level: Level, module_path: Option<&str>) -> bool {
-		let max_level = module_path.and_then(|module_path| LOCAL_LEVELS.read().unwrap().get(module_path).copied()).unwrap_or(self::level());
+		let max_level = module_path.and_then(|module_path| LOCAL_LEVELS.read().unwrap().get(module_path).copied()).unwrap_or_else(self::level);
 		level <= max_level
 	}
 }

@@ -15,9 +15,9 @@ pub enum Category {
 	None = 0,
 	User = 1,
 	System = 15,
-	RMS = 16,
-	PROS = 24,
-	MW = 32,
+	Rms = 16,
+	Pros = 24,
+	Mw = 32,
 }
 impl Default for Category {
 	fn default() -> Self {
@@ -30,9 +30,9 @@ impl std::fmt::Display for Category {
 			Self::None => "(none)",
 			Self::User => "user",
 			Self::System => "system",
-			Self::RMS => "RobotMesh Studio",
-			Self::PROS => "PROS",
-			Self::MW => "MW",
+			Self::Rms => "RobotMesh Studio",
+			Self::Pros => "PROS",
+			Self::Mw => "MW",
 		};
 		formatter.write_str(name)
 	}
@@ -41,14 +41,14 @@ impl std::fmt::Display for Category {
 #[derive(Encode, Decode, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Channel {
-	PIT = 0,
+	Pit = 0,
 	Download = 1,
 }
 
 #[derive(Encode, Decode, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Target {
-	DDR = 0,
+	Ddr = 0,
 	Flash = 1,
 	Screen = 2,
 }
@@ -78,7 +78,7 @@ impl TimeStamp {
 	pub fn now() -> Self {
 		Self(Local::now())
 	}
-	fn to_repr(&self) -> Result<u32, std::num::TryFromIntError> {
+	fn as_repr(&self) -> Result<u32, std::num::TryFromIntError> {
 		let base_time = Local.ymd(2000, 1, 1).and_hms(0, 0, 0);
 		(self.0 - base_time).num_seconds().try_into()
 	}
@@ -95,13 +95,13 @@ impl std::fmt::Display for TimeStamp {
 }
 impl Encode for TimeStamp {
 	fn encode(&self, writer: &mut dyn io::Write) -> encde::Result<()> {
-		self.to_repr().map_err(|_| encde::Error::Custom("Could not extract TimeStamp from its representation"))?.encode(writer)
+		self.as_repr().map_err(|_| encde::Error::Custom("Could not extract TimeStamp from its representation"))?.encode(writer)
 	}
 }
 impl Decode for TimeStamp {
 	fn decode(reader: &mut dyn io::Read) -> encde::Result<Self> {
 		let repr = Decode::decode(reader)?;
-		Ok(Self::from_repr(repr).ok_or(encde::Error::Custom("Could not convert TimeStamp to its representation"))?)
+		Self::from_repr(repr).ok_or(encde::Error::Custom("Could not convert TimeStamp to its representation"))
 	}
 }
 impl From<DateTime<Local>> for TimeStamp {

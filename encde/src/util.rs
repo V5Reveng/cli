@@ -28,11 +28,12 @@ pub fn read_padding(reader: &mut dyn io::Read, mut amount: usize) -> io::Result<
 ///
 /// [Vec]: std::collections::Vec
 /// [Write]: std::io::Write
+#[derive(Default, Debug)]
 pub struct VecWriter(Vec<u8>);
 impl VecWriter {
 	/// Create a new instance with an empty vector
 	pub fn new() -> Self {
-		Self(Vec::new())
+		Self::default()
 	}
 	/// Create a new instance with an empty vector of the given capacity
 	pub fn with_capacity(cap: usize) -> Self {

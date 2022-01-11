@@ -130,8 +130,8 @@ impl LastVariant {
 		}
 		match self.index {
 			UnknownSignInt::Signed(ref mut index) => {
-				if expr.starts_with('-') {
-					*index = -parse::<i64>(&expr[1..]);
+				if let Some(expr) = expr.strip_prefix('-') {
+					*index = -parse::<i64>(expr);
 				} else {
 					*index = parse(expr);
 				}
@@ -187,8 +187,8 @@ impl DiscriminantTracker {
 			.as_ref()
 			.map(VariantWireTagSpanned::span)
 			.or_else(|| rust_discriminant.as_ref().map(|e| e.span()))
-			.unwrap_or_else(|| proc_macro2::Span::call_site());
-		let ret = self._next_variant(&wire_tag, &rust_discriminant);
+			.unwrap_or_else(proc_macro2::Span::call_site);
+		let ret = self._next_variant(wire_tag, rust_discriminant);
 		let actual_value = syn::parse2::<UnknownSignInt>(ret.clone()).expect("Could not parse internally-generated integer (??)");
 		if self.emitted_values.insert(actual_value) {
 			Ok(ret)

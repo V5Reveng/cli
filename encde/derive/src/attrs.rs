@@ -34,7 +34,7 @@ pub enum VariantWireTag {
 	Implicit,
 	/// Synchronize the library's tag with Rust's tag
 	Sync,
-	Explicit(syn::Expr),
+	Explicit(Box<syn::Expr>),
 }
 #[derive(Clone)]
 pub struct VariantWireTagSpanned {
@@ -156,7 +156,7 @@ where
 
 		let parsed_attrs: RawAttrs<<T as Collectible>::Item> = syn::parse2(raw_attr.tokens.clone())?;
 		for attr in parsed_attrs.0 {
-			ret.update(&attr.into());
+			ret.update(&attr);
 		}
 	}
 	Ok(ret)
@@ -202,12 +202,8 @@ impl Collectible for FieldAttributes {
 	}
 }
 
+#[derive(Default)]
 pub struct EnumAttributes {}
-impl Default for EnumAttributes {
-	fn default() -> Self {
-		Self {}
-	}
-}
 impl Collectible for EnumAttributes {
 	type Item = EnumAttribute;
 	fn update(&mut self, _item: &Self::Item) {
@@ -215,12 +211,8 @@ impl Collectible for EnumAttributes {
 	}
 }
 
+#[derive(Default)]
 pub struct StructAttributes {}
-impl Default for StructAttributes {
-	fn default() -> Self {
-		Self {}
-	}
-}
 impl Collectible for StructAttributes {
 	type Item = StructAttribute;
 	fn update(&mut self, _item: &Self::Item) {
@@ -228,13 +220,9 @@ impl Collectible for StructAttributes {
 	}
 }
 
+#[derive(Default)]
 pub struct VariantAttributes {
 	pub wire_tag: Option<VariantWireTagSpanned>,
-}
-impl Default for VariantAttributes {
-	fn default() -> Self {
-		Self { wire_tag: None }
-	}
 }
 impl Collectible for VariantAttributes {
 	type Item = VariantAttribute;
@@ -275,17 +263,10 @@ impl Parse for StructVariantAttribute {
 		}
 	}
 }
+#[derive(Default)]
 pub struct StructVariantAttributes {
 	pub struct_attrs: StructAttributes,
 	pub variant_attrs: VariantAttributes,
-}
-impl Default for StructVariantAttributes {
-	fn default() -> Self {
-		Self {
-			struct_attrs: StructAttributes::default(),
-			variant_attrs: VariantAttributes::default(),
-		}
-	}
 }
 impl Collectible for StructVariantAttributes {
 	type Item = StructVariantAttribute;
