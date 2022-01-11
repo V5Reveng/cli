@@ -369,6 +369,74 @@ impl Device {
 }
 
 impl Device {
+	fn start_file_transfer(&mut self, args: &send::StartFileTransfer) -> Result<receive::StartFileTransfer> {
+		debug!("start file transfer");
+		self.ext_command_with_data(0x11, &args)
+	}
+	fn ft_read_single(&mut self, data: &mut [u8], base_address: filesystem::Address) -> Result<()> {
+		const COMMAND_ID: CommandId = 0x14;
+		let amount_to_read: filesystem::PacketSize = data.len().try_into().expect("Buffer is too large to read with ft_read_single");
+		// pad to 4 bytes
+		let amount_to_read = amount_to_read + 4 & !(4 - 1);
+		debug!("file transfer: rx chunk of {} (padded to {}) bytes", data.len(), amount_to_read);
+		let send = send::FileTransferRead { address: base_address, size: amount_to_read };
+		self.begin_ext_command(COMMAND_ID, &encde::util::encode_to_vec(&send)?)?;
+		let payload_len = self.rx_ext_command_header(COMMAND_ID)? - std::mem::size_of::<u32>();
+		let _address = <u32 as encde::Decode>::decode(&mut self.port)?;
+		if payload_len != amount_to_read as usize {
+			return Err(DeviceError::Protocol(ProtocolError::BadLength {
+				entity: "file transfer read packet",
+				received_length: payload_len,
+			}));
+		}
+		self.port.read_exact(data)?;
+		encde::util::read_padding(&mut self.port, amount_to_read as usize - data.len())?;
+		self.rx_ext_command_footer()?;
+		Ok(())
+	}
+	fn ft_read(&mut self, stream: &mut dyn std::io::Write, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<()> {
+		debug!("file transfer: read {} bytes from 0x{:0>8x}, max packet size is {}", size, base_address, max_packet_size);
+		let mut buffer = vec![0u8; max_packet_size as usize];
+		while size > 0 {
+			let this_packet_size = std::cmp::min(size as usize, max_packet_size as usize);
+			self.ft_read_single(&mut buffer[0..this_packet_size], base_address)?;
+			stream.write_all(&buffer[0..this_packet_size])?;
+			base_address += filesystem::Address::try_from(this_packet_size).unwrap();
+			size -= filesystem::FileSize::try_from(this_packet_size).unwrap();
+		}
+		Ok(())
+	}
+	fn ft_write_single(&mut self, data: &[u8], base_address: filesystem::Address) -> Result<()> {
+		let amount_to_write: filesystem::PacketSize = data.len().try_into().expect("Buffer is too large to write with ft_write_single");
+		// pad to 4 bytes
+		let amount_to_write = amount_to_write + 4 & !(4 - 1);
+		debug!("file transfer: rx chunk of {} (padded to {}) bytes", data.len(), amount_to_write);
+		self.tx_ext_command_header(0x13, std::mem::size_of_val(&base_address) + amount_to_write as usize)?;
+		base_address.encode(&mut self.port)?;
+		self.port.write_all(data)?;
+		encde::util::write_padding(&mut self.port, amount_to_write as usize - data.len())?;
+		self.tx_ext_command_footer()?;
+		Ok(())
+	}
+	fn ft_write(&mut self, stream: &mut dyn std::io::Read, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<()> {
+		debug!("file transfer: write {} to 0x{:0>8x}, max packet size is {}", size, base_address, max_packet_size);
+		let mut buffer = vec![0u8; max_packet_size as usize];
+		while size > 0 {
+			let this_packet_size = std::cmp::min(size as usize, max_packet_size as usize);
+			stream.read_exact(&mut buffer[0..this_packet_size])?;
+			self.ft_write_single(&buffer[0..this_packet_size], base_address)?;
+			base_address += filesystem::Address::try_from(this_packet_size).unwrap();
+			size -= filesystem::FileSize::try_from(this_packet_size).unwrap();
+		}
+		Ok(())
+	}
+	fn end_file_transfer(&mut self, action: filesystem::TransferCompleteAction) -> Result<()> {
+		debug!("end file transfer");
+		self.ext_command_with_data::<_, ()>(0x12, &action)
+	}
+}
+
+impl Device {
 	pub fn device_type(&self) -> UploadableType {
 		self.ty
 	}
@@ -424,5 +492,65 @@ impl Device {
 			ret.push(self.get_file_metadata_by_index(i)?)
 		}
 		Ok(ret)
+	}
+
+	pub fn read_file_to_stream(&mut self, stream: &mut dyn std::io::Write, args: &filesystem::ReadArgs) -> Result<()> {
+		debug!("reading file {}", args.file_name);
+		let file_metadata = self.get_file_metadata_by_name(&send::FileMetadataByName::new(args.category, args.file_name))?;
+		let size = args.size.unwrap_or(file_metadata.size);
+		let address = args.address.unwrap_or(file_metadata.address);
+		let transfer_info = self.start_file_transfer(&send::StartFileTransfer {
+			function: filesystem::Function::Download,
+			target: args.target,
+			category: args.category,
+			overwrite: false,
+			size,
+			address,
+			crc: 0,
+			file_type: args.file_type,
+			timestamp: Default::default(),
+			version: helpers::ShortVersion::new(1, 0, 0, 0),
+			name: args.file_name,
+		})?;
+		self.ft_read(stream, size, address, transfer_info.max_packet_size)?;
+		self.end_file_transfer(filesystem::TransferCompleteAction::default())?;
+		Ok(())
+	}
+	pub fn read_file_to_vec(&mut self, args: &filesystem::ReadArgs) -> Result<Vec<u8>> {
+		let mut stream = if let Some(size) = args.size { encde::util::VecWriter::with_capacity(size as usize) } else { encde::util::VecWriter::new() };
+		self.read_file_to_stream(&mut stream, args)?;
+		Ok(stream.into_inner())
+	}
+	pub fn write_file_from_stream(&mut self, stream: &mut dyn std::io::Read, size: filesystem::FileSize, crc: u32, args: &filesystem::WriteArgs) -> Result<()> {
+		let address = args.address.unwrap_or(0x0380_0000);
+		let transfer_info = self.start_file_transfer(&send::StartFileTransfer {
+			function: filesystem::Function::Upload,
+			target: filesystem::Target::Flash,
+			category: args.category,
+			overwrite: args.overwrite,
+			size,
+			address,
+			crc,
+			file_type: args.file_type,
+			timestamp: args.timestamp,
+			version: helpers::ShortVersion::new(1, 0, 0, 0),
+			name: args.file_name,
+		})?;
+		if transfer_info.file_size < size {
+			return Err(DeviceError::Protocol(ProtocolError::BadLength {
+				entity: "echoed length of file to write",
+				received_length: transfer_info.file_size as usize,
+			}));
+		}
+		// if this doesn't work, try halving the max_packet_size
+		self.ft_write(stream, size, address, transfer_info.max_packet_size)?;
+		self.end_file_transfer(args.action)?;
+		Ok(())
+	}
+	pub fn write_file_from_slice(&mut self, data: &[u8], args: &filesystem::WriteArgs) -> Result<()> {
+		let mut stream = encde::util::SliceReader::new(data);
+		let crc = *<u32 as crate::crc::CrcComputable>::update_crc(&mut 0u32, data);
+		let size: filesystem::FileSize = data.len().try_into().expect("Data to be written is too large");
+		self.write_file_from_stream(&mut stream, size, crc, args)
 	}
 }
