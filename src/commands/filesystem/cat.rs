@@ -1,4 +1,5 @@
 use crate::commands::Runnable;
+use crate::device::filesystem as fs;
 use log::error;
 use std::io::stdout;
 
@@ -6,6 +7,9 @@ use std::io::stdout;
 pub struct Args {
 	/// Remote filename.
 	file: String,
+	/// The category of the file. Can be user, system, pros, rms, mw
+	#[clap(long, short, default_value_t = Default::default())]
+	category: fs::Category,
 }
 
 impl Runnable for Args {
@@ -17,6 +21,7 @@ impl Runnable for Args {
 			&crate::device::filesystem::ReadArgs {
 				file_name,
 				file_type,
+				category: self.category,
 				..Default::default()
 			},
 		);
