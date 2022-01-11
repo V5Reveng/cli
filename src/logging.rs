@@ -44,6 +44,8 @@ pub fn init() {
 		BASE_TIMESTAMP = Some(std::time::Instant::now());
 	}
 	log::set_logger(&LOGGER).expect("Could not set logger");
+	// do our own filtering
+	log::set_max_level(LevelFilter::Trace);
 	match std::env::var("REVENG_LOG_LEVEL") {
 		Ok(env_level) => parse_and_set(&env_level).expect("Could not parse REVENG_LOG_LEVEL environment variable"),
 		Err(std::env::VarError::NotUnicode(_)) => panic!("REVENG_LOG_LEVEL environment variable is not valid Unicode"),
@@ -59,7 +61,6 @@ pub fn set_level(level: LevelFilter) {
 	unsafe {
 		GLOBAL_LEVEL = level;
 	}
-	log::set_max_level(level);
 }
 pub fn set_from_int(level: usize) {
 	set_level(match level {
