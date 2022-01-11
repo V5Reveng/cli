@@ -1,6 +1,6 @@
 use encde::{Decode, Encode};
 
-#[derive(Encode, Decode, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Encode, Decode, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct ShortVersion {
 	major: u8,
 	minor: u8,
@@ -18,7 +18,7 @@ impl std::fmt::Display for ShortVersion {
 	}
 }
 
-#[derive(Encode, Decode, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Encode, Decode, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct LongVersion {
 	common: ShortVersion,
 	build_minor: u8,
@@ -86,3 +86,5 @@ impl std::fmt::Display for Product {
 		}
 	}
 }
+
+pub type SystemID = u32;

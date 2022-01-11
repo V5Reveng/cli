@@ -1,4 +1,4 @@
-use super::filesystem::{Category, FileIndex, FileName};
+use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, Function, PacketSize, Target, TimeStamp};
 use encde::Encode;
 
 #[derive(Encode)]
@@ -34,4 +34,26 @@ impl NumFiles {
 	pub fn new(category: Category) -> Self {
 		Self { category, options: 0 }
 	}
+}
+
+use super::helpers::ShortVersion;
+#[derive(Encode)]
+pub struct StartFileTransfer {
+	pub function: Function,
+	pub target: Target,
+	pub category: Category,
+	pub overwrite: bool,
+	pub size: FileSize,
+	pub address: Address,
+	pub crc: u32,
+	pub file_type: FileType,
+	pub timestamp: TimeStamp,
+	pub version: ShortVersion,
+	pub name: FileName,
+}
+
+#[derive(Encode)]
+pub(super) struct FileTransferRead {
+	pub address: Address,
+	pub size: PacketSize,
 }

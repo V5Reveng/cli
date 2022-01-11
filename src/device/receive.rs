@@ -1,3 +1,4 @@
+use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, PacketSize, TimeStamp};
 use super::helpers::{LongVersion, Product, ShortVersion};
 use encde::Decode;
 
@@ -34,17 +35,16 @@ impl From<ExtendedDeviceInfoNew> for ExtendedDeviceInfo {
 	}
 }
 
-use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, TimeStamp};
 #[derive(Decode, Debug)]
 pub struct FileMetadataByName {
 	/// TODO: find out what this field represents
 	pub linked_category: Category,
 	pub size: FileSize,
-	pub addr: Address,
+	pub address: Address,
 	pub crc: u32,
 	pub file_type: FileType,
 	pub timestamp: TimeStamp,
-	pub version: u32,
+	pub version: ShortVersion,
 	/// TODO: find out what this field represents
 	pub linked_name: FileName,
 }
@@ -52,13 +52,20 @@ pub struct FileMetadataByName {
 pub struct FileMetadataByIndex {
 	pub idx: FileIndex,
 	pub size: FileSize,
-	pub addr: Address,
+	pub address: Address,
 	pub crc: u32,
 	pub file_type: FileType,
 	pub timestamp: TimeStamp,
-	pub version: u32,
+	pub version: ShortVersion,
 	pub name: FileName,
 }
 
 #[derive(Decode)]
 pub struct NumFiles(pub i16);
+
+#[derive(Decode)]
+pub(super) struct StartFileTransfer {
+	pub max_packet_size: PacketSize,
+	pub file_size: FileSize,
+	pub crc: u32,
+}

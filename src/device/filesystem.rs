@@ -2,7 +2,14 @@ use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime, Tim
 use encde::{Decode, Encode};
 use std::io;
 
-#[derive(Encode, Decode, Debug, PartialEq, Eq)]
+#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Copy)]
+#[repr(u8)]
+pub enum Function {
+	Upload = 1,
+	Download = 2,
+}
+
+#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Copy)]
 #[repr(u8)]
 pub enum Category {
 	None = 0,
@@ -31,33 +38,46 @@ impl std::fmt::Display for Category {
 	}
 }
 
-#[derive(Encode, Decode, Debug)]
+#[derive(Encode, Decode, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Channel {
 	PIT = 0,
 	Download = 1,
 }
 
-#[derive(Encode, Decode, Debug)]
+#[derive(Encode, Decode, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Target {
 	DDR = 0,
 	Flash = 1,
 	Screen = 2,
 }
+impl Default for Target {
+	fn default() -> Self {
+		Self::Flash
+	}
+}
 
-#[derive(Encode, Decode, Debug)]
+#[derive(Encode, Decode, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum TransferCompleteAction {
 	NoRun = 0b00,
 	RunImmediately = 0b01,
 	RunScreen = 0b11,
 }
+impl Default for TransferCompleteAction {
+	fn default() -> Self {
+		Self::NoRun
+	}
+}
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 #[repr(transparent)]
 pub struct TimeStamp(DateTime<Local>);
 impl TimeStamp {
+	pub fn now() -> Self {
+		Self(Local::now())
+	}
 	fn to_repr(&self) -> Result<u32, std::num::TryFromIntError> {
 		let base_time = Local.ymd(2000, 1, 1).and_hms(0, 0, 0);
 		(self.0 - base_time).num_seconds().try_into()
@@ -84,16 +104,27 @@ impl Decode for TimeStamp {
 		Ok(Self::from_repr(repr).ok_or(encde::Error::Custom("Could not convert TimeStamp to its representation"))?)
 	}
 }
+impl From<DateTime<Local>> for TimeStamp {
+	fn from(dt: DateTime<Local>) -> Self {
+		Self(dt)
+	}
+}
+impl Default for TimeStamp {
+	fn default() -> TimeStamp {
+		Self::now()
+	}
+}
 
 /// The V5 is a 32-bit platform.
 pub type Address = u32;
 pub type FileSize = u32;
 
 pub type FileIndex = u8;
+pub type PacketSize = u16;
 
 macro_rules! fixed_string_type {
 	($ident:ident, $size:tt) => {
-		#[derive(Encode, Decode, Default)]
+		#[derive(Encode, Decode, Default, Clone, Copy, Eq)]
 		#[repr(transparent)]
 		pub struct $ident([u8; $size]);
 		impl std::str::FromStr for $ident {
@@ -138,4 +169,30 @@ macro_rules! fixed_string_type {
 }
 
 fixed_string_type!(FileType, 4);
+// This type is the same size as String so you might as well store it by value!
 fixed_string_type!(FileName, 24);
+
+#[derive(Default)]
+pub struct ReadArgs {
+	pub file_name: FileName,
+	pub file_type: FileType,
+	pub category: Category,
+	pub target: Target,
+	pub address: Option<Address>,
+	pub size: Option<FileSize>,
+}
+
+#[derive(Default)]
+pub struct WriteArgs {
+	pub file_name: FileName,
+	pub file_type: FileType,
+	pub action: TransferCompleteAction,
+	pub category: Category,
+	pub target: Target,
+	pub address: Option<Address>,
+	pub overwrite: bool,
+	pub timestamp: TimeStamp,
+	// YAGNI
+	// pub linked_filename: Option<FileName>,
+	// pub linked_category: Option<Category>,
+}
