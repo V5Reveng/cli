@@ -10,7 +10,7 @@ pub struct Args {
 
 impl Runnable for Args {
 	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
-		let mut dev = dev.expect_one();
+		let mut dev = crate::commands::unwrap_device_presence(dev);
 		if let Some(file) = self.file {
 			// print info for the file
 			let send_data = send::FileMetadataByName::new(fs::Category::default(), fs::FileName::from_str(&file).unwrap());

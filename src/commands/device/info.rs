@@ -5,7 +5,7 @@ pub struct Args {}
 
 impl Runnable for Args {
 	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
-		let mut dev = dev.expect_one();
+		let mut dev = dev.expect_one("No uploadable device found", "Multiple uploadable devices found");
 		let dev_info = dev.device_info().unwrap();
 		let ext_dev_info = dev.extended_device_info().unwrap();
 		println!("Device type: {}", dev_info.product);

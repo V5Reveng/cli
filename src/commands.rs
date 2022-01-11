@@ -61,3 +61,7 @@ impl Args {
 pub fn run() {
 	Args::parse().run();
 }
+
+pub fn unwrap_device_presence(pres: Presence<Device>) -> Device {
+	pres.expect_one("No uploadable devices found.", "Multiple uploadable devices found. You can specify just one with the --device-path argument.")
+}

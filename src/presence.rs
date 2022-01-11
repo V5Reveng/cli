@@ -1,5 +1,3 @@
-use core::any::type_name;
-
 pub enum Presence<T> {
 	None,
 	One(T),
@@ -40,14 +38,12 @@ impl<T> From<Presence<T>> for Result<T, NotOne<T>> {
 	}
 }
 
-impl<T: std::fmt::Debug> Presence<T> {
-	pub fn expect_one(self) -> T {
+impl<T> Presence<T> {
+	pub fn expect_one(self, none_message: &'static str, many_message: &'static str) -> T {
 		match self {
-			Self::None => panic!("Expected one {} present, found none", type_name::<T>()),
+			Self::None => panic!("{}", none_message),
 			Self::One(item) => item,
-			Self::Many(ref items) => {
-				panic!("Expected one {} present, found many:\n{:?}", type_name::<T>(), items);
-			}
+			Self::Many(_) => panic!("{}", many_message),
 		}
 	}
 }
