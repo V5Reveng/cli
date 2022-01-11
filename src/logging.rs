@@ -24,21 +24,15 @@ static LOGGER: SimpleLogger = SimpleLogger(());
 /// On error, returns a reason along with the invalid string
 fn parse_and_set(raw: &str) -> Result<(), (&'static str, &str)> {
 	for item in raw.split(',') {
-		let split: Vec<_> = item.split('=').collect();
-		match split.len() {
-			1 => {
-				let level = split[0];
+		match item.rsplit_once('=') {
+			None => {
+				let level = item;
 				let level = LEVELS.get(level).ok_or((INVALID_LEVEL, level))?;
 				self::set_level(*level);
 			}
-			2 => {
-				let module = split[0];
-				let level = split[1];
+			Some((module, level)) => {
 				let level = LEVELS.get(level).ok_or((INVALID_LEVEL, level))?;
 				LOCAL_LEVELS.write().unwrap().insert(module.to_owned(), *level);
-			}
-			_ => {
-				return Err(("Invalid format", item));
 			}
 		}
 	}
