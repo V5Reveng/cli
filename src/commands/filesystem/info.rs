@@ -16,10 +16,10 @@ impl Runnable for Args {
 			let send_data = send::FileMetadataByName::new(fs::Category::default(), fs::FileName::from_str(&file).unwrap());
 			let metadata = dev.get_file_metadata_by_name(&send_data).unwrap();
 			println!("Size: {}", metadata.size);
-			println!("Address: {:0>#8x}", metadata.addr);
+			println!("Address: 0x{:0>8x}", metadata.address);
 			println!("File type: {}", metadata.file_type);
 			println!("Last modified: {}", metadata.timestamp);
-			println!("Version: {:0>#8x}", metadata.version);
+			println!("Version: {}", metadata.version);
 			let is_link = metadata.linked_category != fs::Category::None;
 			println!("Is link? {}", is_link);
 			if is_link {
@@ -30,12 +30,12 @@ impl Runnable for Args {
 			// list files
 			let files = dev.list_all_files(fs::Category::default()).unwrap();
 			println!("Num files: {}", files.len());
-			println!("Address    Mtime                       Version    Size  Type  Name\n");
+			println!("Address      Mtime                       Version    Size  Type  Name\n");
 			for metadata in files {
 				println!(
-					"{address:0>#8x}  {mtime}  {version:0>#8x}  {size: >4}  {ty: <4}  {name}",
+					"0x{address:0>8x}  {mtime}  {version: >8}  {size: >4}  {ty: <4}  {name}",
 					size = metadata.size,
-					address = metadata.addr,
+					address = metadata.address,
 					ty = metadata.file_type,
 					mtime = metadata.timestamp,
 					version = metadata.version,
