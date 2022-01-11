@@ -407,15 +407,17 @@ impl Device {
 		Ok(())
 	}
 	fn ft_write_single(&mut self, data: &[u8], base_address: filesystem::Address) -> Result<()> {
+		const COMMAND_ID: CommandId = 0x13;
 		let amount_to_write: filesystem::PacketSize = data.len().try_into().expect("Buffer is too large to write with ft_write_single");
 		// pad to 4 bytes
 		let amount_to_write = (amount_to_write + 4) & !(4 - 1);
 		debug!("file transfer: rx chunk of {} (padded to {}) bytes", data.len(), amount_to_write);
-		self.tx_ext_command_header(0x13, std::mem::size_of_val(&base_address) + amount_to_write as usize)?;
+		self.tx_ext_command_header(COMMAND_ID, std::mem::size_of_val(&base_address) + amount_to_write as usize)?;
 		base_address.encode(&mut self.port)?;
 		self.port.write_all(data)?;
 		encde::util::write_padding(&mut self.port, amount_to_write as usize - data.len())?;
 		self.tx_ext_command_footer()?;
+		self.end_ext_command::<()>(COMMAND_ID)?;
 		Ok(())
 	}
 	fn ft_write(&mut self, stream: &mut dyn std::io::Read, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<()> {
