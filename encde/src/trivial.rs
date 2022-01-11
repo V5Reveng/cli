@@ -142,3 +142,20 @@ impl<T: Decode, const N: usize> Decode for [T; N] {
 		}
 	}
 }
+
+impl<T: Encode> Encode for &T {
+	fn encode(&self, writer: &mut dyn Write) -> Result<()> {
+		(*self).encode(writer)
+	}
+}
+
+impl Encode for () {
+	fn encode(&self, _writer: &mut dyn Write) -> Result<()> {
+		Ok(())
+	}
+}
+impl Decode for () {
+	fn decode(_reader: &mut dyn Read) -> Result<Self> {
+		Ok(())
+	}
+}
