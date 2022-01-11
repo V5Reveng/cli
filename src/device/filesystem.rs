@@ -37,6 +37,19 @@ impl std::fmt::Display for Category {
 		formatter.write_str(name)
 	}
 }
+impl std::str::FromStr for Category {
+	type Err = &'static str;
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"user" => Ok(Self::User),
+			"system" => Ok(Self::System),
+			"rms" => Ok(Self::Rms),
+			"pros" => Ok(Self::Pros),
+			"mw" => Ok(Self::Mw),
+			_ => Err("Unknown file category. Possible categories are user, system, rms, pros, mw."),
+		}
+	}
+}
 
 #[derive(Encode, Decode, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
