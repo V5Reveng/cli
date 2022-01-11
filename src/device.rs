@@ -275,6 +275,7 @@ impl Device {
 				received: encde::util::encode_to_vec(&received)?.into(),
 			}))
 		} else {
+			trace!("rx {}, expecting value {:?}", entity, expected);
 			Ok(())
 		}
 	}
@@ -384,6 +385,7 @@ impl Device {
 	}
 
 	pub fn get_file_metadata_by_name(&mut self, args: &send::FileMetadataByName) -> Result<receive::FileMetadataByName> {
+		debug!("sending get-file-metadata-by-name command");
 		self.ext_command_with_data::<_, receive::FileMetadataByName>(0x19, args)
 	}
 	pub fn get_file_metadata_by_index(&mut self, index: filesystem::FileIndex) -> Result<receive::FileMetadataByIndex> {
@@ -391,9 +393,11 @@ impl Device {
 	}
 
 	pub fn num_files(&mut self, category: filesystem::Category) -> Result<isize> {
+		debug!("sending num-files command");
 		self.ext_command_with_data::<_, receive::NumFiles>(0x16, &send::NumFiles::new(category)).map(|receive::NumFiles(num)| num as isize)
 	}
 	pub fn list_all_files(&mut self, category: filesystem::Category) -> Result<Vec<receive::FileMetadataByIndex>> {
+		debug!("listing all files");
 		let num_files: usize = self.num_files(category)?.try_into().expect("The number of files was negative");
 		let num_files = if num_files > (u8::MAX as usize) {
 			warn!("There are too many files to list all of them; only listing the first {}", u8::MAX);
