@@ -99,7 +99,7 @@ impl CRCSerialPort {
 	pub fn end_rx_crc(&mut self) -> std::io::Result<bool> {
 		let mut buf = [0u8; u16::BITS as usize / (u8::BITS as usize)];
 		<Self as std::io::Read>::read_exact(self, &mut buf)?;
-		debug!("end rx crc with checksum {:02x}{:02x}", buf[0], buf[1]);
+		debug!("end rx crc with checksum 0x{:02x}{:02x}", buf[0], buf[1]);
 		Ok(self.rx_crc == 0)
 	}
 	pub fn end_tx_crc(&mut self) -> std::io::Result<()> {
