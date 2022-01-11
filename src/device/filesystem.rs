@@ -140,6 +140,12 @@ macro_rules! fixed_string_type {
 				Ok(ret)
 			}
 		}
+		impl std::convert::TryFrom<&str> for $ident {
+			type Error = <Self as std::str::FromStr>::Err;
+			fn try_from(s: &str) -> Result<Self, Self::Error> {
+				<Self as std::str::FromStr>::from_str(s)
+			}
+		}
 		impl $ident {
 			pub fn as_str(&self) -> Result<&str, std::str::Utf8Error> {
 				let mut len = $size;
@@ -163,6 +169,21 @@ macro_rules! fixed_string_type {
 		impl std::fmt::Display for $ident {
 			fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
 				self.as_str().map_err(|_| std::fmt::Error::default())?.fmt(formatter)
+			}
+		}
+		impl PartialEq for $ident {
+			fn eq(&self, other: &Self) -> bool {
+				for (&c1, &c2) in self.0.iter().zip(other.0.iter()) {
+					if c1 != c2 {
+						return false;
+					}
+					// end of string: quit early
+					// c1 == c2 due to previous block
+					if c1 == 0 {
+						return true;
+					}
+				}
+				true
 			}
 		}
 	};
