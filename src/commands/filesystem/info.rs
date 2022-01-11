@@ -5,6 +5,9 @@ use crate::device::{filesystem as fs, send};
 pub struct Args {
 	/// Remote filename.
 	file: Option<String>,
+	/// The category of the file. Can be user, system, pros, rms, mw
+	#[clap(long, short, default_value_t = Default::default())]
+	category: fs::Category,
 }
 
 impl Runnable for Args {
@@ -13,7 +16,7 @@ impl Runnable for Args {
 		if let Some(file) = self.file {
 			// print info for the file
 			let (file_name, _) = crate::commands::string_to_file_name_and_type(&file);
-			let send_data = send::FileMetadataByName::new(fs::Category::default(), file_name);
+			let send_data = send::FileMetadataByName::new(self.category, file_name);
 			let metadata = dev.get_file_metadata_by_name(&send_data).unwrap();
 			println!("Size: {}", metadata.size);
 			println!("Address: 0x{:0>8x}", metadata.address);
@@ -28,7 +31,7 @@ impl Runnable for Args {
 			}
 		} else {
 			// list files
-			let files = dev.list_all_files(fs::Category::default()).unwrap();
+			let files = dev.list_all_files(self.category).unwrap();
 			println!("Num files: {}", files.len());
 			println!("Address      Mtime                       Version    Size  Type  Name\n");
 			for metadata in files {
