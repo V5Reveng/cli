@@ -7,9 +7,8 @@ mod info;
 #[cfg(target_os = "linux")]
 mod mount;
 mod mv;
-mod pull;
-mod push;
 mod rm;
+mod sponge;
 
 #[derive(clap::Parser)]
 pub struct Args {
@@ -27,6 +26,7 @@ impl Runnable for Args {
 #[derive(clap::Subcommand)]
 enum Commands {
 	/// Output the contents of a file.
+	/// To "pull" a file from the device, you can add ` > localfile` to the command line.
 	Cat(cat::Args),
 	/// Copy file.
 	Cp(cp::Args),
@@ -39,10 +39,9 @@ enum Commands {
 	Mount(mount::Args),
 	/// Move a file.
 	Mv(mv::Args),
-	/// Copy file from device filesystem to local filesystem.
-	Pull(pull::Args),
-	/// Copy file from local filesystem to device filesystem.
-	Push(push::Args),
+	/// Write stdin to a remote file.
+	/// To "push" a file to the device, you can add ` < localfile` to the command line.
+	Sponge(sponge::Args),
 	/// Delete a file.
 	Rm(rm::Args),
 }
@@ -56,9 +55,8 @@ impl Runnable for Commands {
 			Commands::Info(args) => args.run(dev),
 			Commands::Mount(args) => args.run(dev),
 			Commands::Mv(args) => args.run(dev),
-			Commands::Pull(args) => args.run(dev),
-			Commands::Push(args) => args.run(dev),
 			Commands::Rm(args) => args.run(dev),
+			Commands::Sponge(args) => args.run(dev),
 		}
 	}
 }
