@@ -24,13 +24,26 @@ pub fn read_padding(reader: &mut dyn io::Read, mut amount: usize) -> io::Result<
 	Ok(())
 }
 
-struct VecWriter(Vec<u8>);
+/// A wrapper around a [Vec]<u8> that can be [Write]n to
+///
+/// [Vec]: std::collections::Vec
+/// [Write]: std::io::Write
+pub struct VecWriter(Vec<u8>);
 impl VecWriter {
+	/// Create a new instance with an empty vector
 	pub fn new() -> Self {
 		Self(Vec::new())
 	}
+	/// Create a new instance with an empty vector of the given capacity
+	pub fn with_capacity(cap: usize) -> Self {
+		Self(Vec::with_capacity(cap))
+	}
+	/// Consume the VecWriter and return the internal vector
+	pub fn into_inner(self) -> Vec<u8> {
+		self.0
+	}
 }
-impl<'a> std::io::Write for VecWriter {
+impl std::io::Write for VecWriter {
 	fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
 		self.0.extend(data);
 		Ok(data.len())
@@ -46,11 +59,16 @@ pub fn encode_to_vec(item: &dyn Encode) -> crate::Result<Vec<u8>> {
 	Ok(writer.0)
 }
 
-struct SliceReader<'a>(&'a [u8]);
+/// A wrapper around a byte slice that can be [Read] from
+///
+/// [Read]: std::io::Read
+pub struct SliceReader<'a>(&'a [u8]);
 impl<'a> SliceReader<'a> {
+	/// Create a new instance with the provided slice as the backing data
 	pub fn new<'b: 'a>(slice: &'b [u8]) -> Self {
 		Self(slice)
 	}
+	/// Return the number of bytes remaining in the backing data
 	pub fn remaining(&self) -> usize {
 		self.0.len()
 	}
