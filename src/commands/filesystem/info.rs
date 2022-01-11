@@ -1,6 +1,5 @@
 use crate::commands::Runnable;
 use crate::device::{filesystem as fs, send};
-use std::str::FromStr;
 
 #[derive(clap::Parser)]
 pub struct Args {
@@ -13,7 +12,8 @@ impl Runnable for Args {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 		if let Some(file) = self.file {
 			// print info for the file
-			let send_data = send::FileMetadataByName::new(fs::Category::default(), fs::FileName::from_str(&file).unwrap());
+			let (file_name, _) = crate::commands::string_to_file_name_and_type(&file);
+			let send_data = send::FileMetadataByName::new(fs::Category::default(), file_name);
 			let metadata = dev.get_file_metadata_by_name(&send_data).unwrap();
 			println!("Size: {}", metadata.size);
 			println!("Address: 0x{:0>8x}", metadata.address);

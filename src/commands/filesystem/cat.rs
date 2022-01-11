@@ -11,11 +11,12 @@ pub struct Args {
 impl Runnable for Args {
 	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
+		let (file_name, file_type) = crate::commands::string_to_file_name_and_type(&self.file);
 		let contents = dev.read_file_to_stream(
 			&mut stdout(),
 			&crate::device::filesystem::ReadArgs {
-				file_name: self.file.as_str().try_into().unwrap(),
-				file_type: self.file.as_str().rsplit_once('.').map(|(_, ext)| ext).unwrap_or("").try_into().unwrap(),
+				file_name,
+				file_type,
 				..Default::default()
 			},
 		);
