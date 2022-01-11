@@ -524,7 +524,10 @@ impl Device {
 		Ok(stream.into_inner())
 	}
 	pub fn write_file_from_stream(&mut self, stream: &mut dyn std::io::Read, size: filesystem::FileSize, crc: u32, args: &filesystem::WriteArgs) -> Result<()> {
-		let address = args.address.unwrap_or(0x0380_0000);
+		let address = match args.address {
+			Some(addr) => addr,
+			None => self.get_file_metadata_by_name(&send::FileMetadataByName::new(args.category, args.file_name)).map(|x| x.address).unwrap_or(0x0780_0000),
+		};
 		let transfer_info = self.start_file_transfer(&send::StartFileTransfer {
 			function: filesystem::Function::Upload,
 			target: filesystem::Target::Flash,
