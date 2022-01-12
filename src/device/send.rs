@@ -57,3 +57,10 @@ pub(super) struct FileTransferRead {
 	pub address: Address,
 	pub size: PacketSize,
 }
+
+#[derive(Encode)]
+pub(super) struct DeleteFile {
+	pub category: Category,
+	pub options: u8,
+	pub name: FileName,
+}

@@ -549,4 +549,18 @@ impl Device {
 		let size: filesystem::FileSize = data.len().try_into().expect("Data to be written is too large");
 		self.write_file_from_stream(&mut stream, file_name, file_type, size, crc, args)
 	}
+
+	pub fn delete_file(&mut self, file_name: &filesystem::FileName, args: &filesystem::DeleteArgs) -> Result<()> {
+		self.ext_command_with_data::<_, ()>(
+			0x1b,
+			&send::DeleteFile {
+				category: args.category,
+				options: if args.include_linked { 0b10_00_00_00 } else { 0 },
+				name: *file_name,
+			},
+		)?;
+		// I'm not convinced that this is necessary, but the PROS CLI includes it.
+		self.end_file_transfer(Default::default())?;
+		Ok(())
+	}
 }

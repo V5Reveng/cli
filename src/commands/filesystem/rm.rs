@@ -15,6 +15,13 @@ pub struct Args {
 
 impl Runnable for Args {
 	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
-		todo!()
+		let mut dev = crate::commands::unwrap_device_presence(dev);
+		let (file_name, _) = crate::commands::string_to_file_name_and_type(&self.file);
+		let args = fs::DeleteArgs {
+			category: self.category,
+			include_linked: self.include_linked,
+		};
+		dev.delete_file(&file_name, &args).unwrap();
+		0
 	}
 }

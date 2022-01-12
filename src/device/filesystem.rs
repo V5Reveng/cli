@@ -226,3 +226,9 @@ pub struct WriteArgs {
 	// pub linked_filename: Option<FileName>,
 	// pub linked_category: Option<Category>,
 }
+
+#[derive(Default)]
+pub struct DeleteArgs {
+	pub category: Category,
+	pub include_linked: bool,
+}
