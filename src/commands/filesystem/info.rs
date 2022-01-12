@@ -11,7 +11,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
+	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 		if let Some(file) = self.file {
 			// print info for the file
@@ -29,6 +29,7 @@ impl Runnable for Args {
 				println!("Linked category: {}", metadata.linked_category);
 				println!("Linked filename: {}", metadata.linked_name);
 			}
+			0
 		} else {
 			// list files
 			let files = dev.list_all_files(self.category).unwrap();
@@ -45,6 +46,7 @@ impl Runnable for Args {
 					name = metadata.name
 				);
 			}
+			0
 		}
 	}
 }

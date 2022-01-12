@@ -16,7 +16,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
+	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 
 		// do this now so it fails before we do IO
@@ -62,7 +62,7 @@ impl Runnable for Args {
 		// check for a difference, exiting if none or if the edited file no longer exists
 		if !edited_name.is_file() {
 			error!("Edited file no longer exists or is not a file.");
-			return;
+			return 1;
 		}
 		let mut edited_file = fs::File::open(&edited_name).expect("Opening edited file");
 		let (files_are_different, edited_len) = {
@@ -71,7 +71,7 @@ impl Runnable for Args {
 		};
 		if !files_are_different {
 			warn!("File was unchanged.");
-			return;
+			return 1;
 		}
 
 		// write back the edited file
@@ -94,6 +94,8 @@ impl Runnable for Args {
 				)
 				.expect("Writing edited file");
 		}
+
+		0
 	}
 }
 

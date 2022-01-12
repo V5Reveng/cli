@@ -6,7 +6,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
-		todo!();
+	fn run(self, _dev: crate::presence::Presence<crate::device::Device>) -> u32 {
+		todo!()
 	}
 }

@@ -15,8 +15,8 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
-		self.sub.run(dev);
+	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
+		self.sub.run(dev)
 	}
 }
 
@@ -41,7 +41,7 @@ enum Commands {
 }
 
 impl Runnable for Commands {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
+	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
 		match self {
 			Commands::Cat(args) => args.run(dev),
 			Commands::Edit(args) => args.run(dev),

@@ -21,7 +21,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) {
+	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 		let (file_name, file_type) = crate::commands::string_to_file_name_and_type(&self.file);
 		let mut data = Vec::default();
@@ -35,5 +35,6 @@ impl Runnable for Args {
 			..Default::default()
 		};
 		dev.write_file_from_slice(&data, &args).unwrap()
+		0
 	}
 }

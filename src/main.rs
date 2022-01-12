@@ -7,5 +7,6 @@ mod temp_dir;
 
 fn main() {
 	logging::init();
-	commands::run();
+	let exit_code = commands::run();
+	std::process::exit(exit_code as i32);
 }

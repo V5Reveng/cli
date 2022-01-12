@@ -11,7 +11,7 @@ mod filesystem;
 mod program;
 
 trait Runnable {
-	fn run(self, device: Presence<Device>);
+	fn run(self, device: Presence<Device>) -> u32;
 }
 
 #[derive(clap::Subcommand)]
@@ -22,7 +22,7 @@ enum Subcommand {
 }
 
 impl Runnable for Subcommand {
-	fn run(self, dev: Presence<Device>) {
+	fn run(self, dev: Presence<Device>) -> u32 {
 		match self {
 			Subcommand::Filesystem(args) => args.run(dev),
 			Subcommand::Program(args) => args.run(dev),
@@ -46,7 +46,7 @@ struct Args {
 }
 
 impl Args {
-	fn run(self) {
+	fn run(self) -> u32 {
 		if self.verbosity > 0 {
 			logging::set_from_int(self.verbosity);
 		}
@@ -55,12 +55,12 @@ impl Args {
 		} else {
 			Presence::from(UploadableInfo::get_all().expect("Failed to get serial ports").into_iter().filter_map(|port| Device::try_from(port).ok()).collect::<Vec<Device>>())
 		};
-		self.sub.run(device);
+		self.sub.run(device)
 	}
 }
 
-pub fn run() {
-	Args::parse().run();
+pub fn run() -> u32 {
+	Args::parse().run()
 }
 
 pub fn unwrap_device_presence(pres: Presence<Device>) -> Device {
