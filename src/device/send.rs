@@ -77,3 +77,19 @@ impl DeleteFile {
 		}
 	}
 }
+
+#[derive(Encode)]
+pub(super) struct FileTransferSetLink {
+	pub linked_category: Category,
+	options: u8,
+	pub linked_name: FileName,
+}
+impl FileTransferSetLink {
+	pub(super) fn new(linked_file: &QualFileName) -> Self {
+		Self {
+			linked_category: linked_file.category,
+			options: 0,
+			linked_name: linked_file.name,
+		}
+	}
+}

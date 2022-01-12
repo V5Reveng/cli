@@ -334,9 +334,7 @@ pub struct WriteArgs {
 	pub address: Option<Address>,
 	pub overwrite: bool,
 	pub timestamp: TimeStamp,
-	// YAGNI
-	// pub linked_filename: Option<FileName>,
-	// pub linked_category: Option<Category>,
+	pub linked_file: Option<QualFileName>,
 }
 
 #[derive(Default)]

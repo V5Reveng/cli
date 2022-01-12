@@ -448,6 +448,10 @@ impl Device {
 		}
 		Ok(())
 	}
+	fn ft_set_link(&mut self, linked_file: &filesystem::QualFileName) -> Result<()> {
+		debug!("file transfer: set link to {}", linked_file);
+		self.ext_command_with_data::<_, ()>(0x15, &send::FileTransferSetLink::new(linked_file))
+	}
 	fn end_file_transfer(&mut self, action: filesystem::TransferCompleteAction) -> Result<()> {
 		debug!("end file transfer");
 		self.ext_command_with_data::<_, ()>(0x12, &action)
@@ -570,6 +574,9 @@ impl Device {
 				entity: "echoed length of file to write",
 				received_length: transfer_info.file_size as usize,
 			}));
+		}
+		if let Some(ref linked_file) = args.linked_file {
+			self.ft_set_link(linked_file)?;
 		}
 		// if this doesn't work, try halving the max_packet_size
 		self.ft_write(stream, size, address, transfer_info.max_packet_size)?;

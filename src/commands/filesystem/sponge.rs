@@ -13,13 +13,18 @@ pub struct Args {
 	/// Whether to overwrite the file if it exists
 	#[clap(long = "force", short)]
 	overwrite: bool,
-	/// The address of the file.
+	/// The address of the file. (Expert)
 	///
 	/// Only really matters for executables.
 	/// If not specified and the remote file exists, use its address.
 	/// Otherwise, use a predefined address.
 	#[clap(long, parse(try_from_str=maybe_hex))]
 	address: Option<fs::Address>,
+	/// The link of the file. (Expert)
+	///
+	/// If file A has a link to file B, then B is loaded into memory along with A when A is executed.
+	#[clap(long)]
+	link: Option<fs::QualFileName>,
 }
 
 impl Runnable for Args {
@@ -31,6 +36,7 @@ impl Runnable for Args {
 		let args = fs::WriteArgs {
 			address: self.address,
 			overwrite: self.overwrite,
+			linked_file: self.link,
 			..Default::default()
 		};
 		dev.write_file_from_slice(&data, &self.file, &args).unwrap();
