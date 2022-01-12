@@ -16,15 +16,7 @@ impl Runnable for Args {
 	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 		let (file_name, file_type) = crate::commands::string_to_file_name_and_type(&self.file);
-		let contents = dev.read_file_to_stream(
-			&mut stdout(),
-			&crate::device::filesystem::ReadArgs {
-				file_name,
-				file_type,
-				category: self.category,
-				..Default::default()
-			},
-		);
+		let contents = dev.read_file_to_stream(&mut stdout(), &file_name, &file_type, &crate::device::filesystem::ReadArgs { category: self.category, ..Default::default() });
 		match contents {
 			Err(crate::device::DeviceError::Protocol(crate::device::ProtocolError::Nack(crate::device::ResponseByte::ProgramFileError))) => {
 				error!("File does not exist: {}", self.file);

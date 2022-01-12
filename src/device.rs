@@ -484,9 +484,9 @@ impl Device {
 		Ok(ret)
 	}
 
-	pub fn read_file_to_stream(&mut self, stream: &mut dyn std::io::Write, args: &filesystem::ReadArgs) -> Result<()> {
-		debug!("reading file {}", args.file_name);
-		let file_metadata = self.get_file_metadata_by_name(&send::FileMetadataByName::new(args.category, args.file_name))?;
+	pub fn read_file_to_stream(&mut self, stream: &mut dyn std::io::Write, file_name: &filesystem::FileName, file_type: &filesystem::FileType, args: &filesystem::ReadArgs) -> Result<()> {
+		debug!("reading file {}", file_name);
+		let file_metadata = self.get_file_metadata_by_name(&send::FileMetadataByName::new(args.category, *file_name))?;
 		let size = args.size.unwrap_or(file_metadata.size);
 		let address = args.address.unwrap_or(file_metadata.address);
 		let transfer_info = self.start_file_transfer(&send::StartFileTransfer {
@@ -497,19 +497,20 @@ impl Device {
 			size,
 			address,
 			crc: 0,
-			file_type: args.file_type,
+			file_type: *file_type,
 			timestamp: Default::default(),
 			version: helpers::ShortVersion::new(1, 0, 0, 0),
-			name: args.file_name,
+			name: *file_name,
 		})?;
 		self.ft_read(stream, size, address, transfer_info.max_packet_size)?;
 		self.end_file_transfer(filesystem::TransferCompleteAction::default())?;
 		Ok(())
 	}
-	pub fn write_file_from_stream(&mut self, stream: &mut dyn std::io::Read, size: filesystem::FileSize, crc: u32, args: &filesystem::WriteArgs) -> Result<()> {
+
+	pub fn write_file_from_stream(&mut self, stream: &mut dyn std::io::Read, file_name: &filesystem::FileName, file_type: &filesystem::FileType, size: filesystem::FileSize, crc: u32, args: &filesystem::WriteArgs) -> Result<()> {
 		let address = match args.address {
 			Some(addr) => addr,
-			None => self.get_file_metadata_by_name(&send::FileMetadataByName::new(args.category, args.file_name)).map(|x| x.address).unwrap_or(0x0780_0000),
+			None => self.get_file_metadata_by_name(&send::FileMetadataByName::new(args.category, *file_name)).map(|x| x.address).unwrap_or(0x0780_0000),
 		};
 		let transfer_info = self.start_file_transfer(&send::StartFileTransfer {
 			function: filesystem::Function::Upload,
@@ -519,10 +520,10 @@ impl Device {
 			size,
 			address,
 			crc,
-			file_type: args.file_type,
+			file_type: *file_type,
 			timestamp: args.timestamp,
 			version: helpers::ShortVersion::new(1, 0, 0, 0),
-			name: args.file_name,
+			name: *file_name,
 		})?;
 		if transfer_info.file_size < size {
 			return Err(DeviceError::Protocol(ProtocolError::BadLength {
@@ -535,10 +536,10 @@ impl Device {
 		self.end_file_transfer(args.action)?;
 		Ok(())
 	}
-	pub fn write_file_from_slice(&mut self, data: &[u8], args: &filesystem::WriteArgs) -> Result<()> {
+	pub fn write_file_from_slice(&mut self, data: &[u8], file_name: &filesystem::FileName, file_type: &filesystem::FileType, args: &filesystem::WriteArgs) -> Result<()> {
 		let mut stream = encde::util::SliceReader::new(data);
 		let crc = *<u32 as crate::crc::CrcComputable>::update_crc(&mut 0u32, data);
 		let size: filesystem::FileSize = data.len().try_into().expect("Data to be written is too large");
-		self.write_file_from_stream(&mut stream, size, crc, args)
+		self.write_file_from_stream(&mut stream, file_name, file_type, size, crc, args)
 	}
 }

@@ -208,8 +208,6 @@ fixed_string_type!(FileName, 24);
 
 #[derive(Default)]
 pub struct ReadArgs {
-	pub file_name: FileName,
-	pub file_type: FileType,
 	pub category: Category,
 	pub target: Target,
 	pub address: Option<Address>,
@@ -218,8 +216,6 @@ pub struct ReadArgs {
 
 #[derive(Default)]
 pub struct WriteArgs {
-	pub file_name: FileName,
-	pub file_type: FileType,
 	pub action: TransferCompleteAction,
 	pub category: Category,
 	pub target: Target,

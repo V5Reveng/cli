@@ -27,14 +27,12 @@ impl Runnable for Args {
 		let mut data = Vec::default();
 		stdin().read_to_end(&mut data).expect("Could not read from stdin");
 		let args = fs::WriteArgs {
-			file_name,
-			file_type,
 			address: self.address,
 			overwrite: self.overwrite,
 			category: self.category,
 			..Default::default()
 		};
-		dev.write_file_from_slice(&data, &args).unwrap()
+		dev.write_file_from_slice(&data, &file_name, &file_type, &args).unwrap();
 		0
 	}
 }

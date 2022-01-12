@@ -32,15 +32,7 @@ impl Runnable for Args {
 		{
 			let mut to_edit_file = fs::File::create(&to_edit_name).expect("Creating local copy file");
 			dev
-				.read_file_to_stream(
-					&mut to_edit_file,
-					&dev_fs::ReadArgs {
-						file_name: remote_file_name,
-						file_type: remote_file_type,
-						category: self.category,
-						..Default::default()
-					},
-				)
+				.read_file_to_stream(&mut to_edit_file, &remote_file_name, &remote_file_type, &dev_fs::ReadArgs { category: self.category, ..Default::default() })
 				.expect("Could not read file from device");
 		}
 
@@ -82,11 +74,11 @@ impl Runnable for Args {
 			dev
 				.write_file_from_stream(
 					&mut edited_file,
+					&remote_file_name,
+					&remote_file_type,
 					edited_len.try_into().expect("Edited file is too large"),
 					edited_crc,
 					&dev_fs::WriteArgs {
-						file_name: remote_file_name,
-						file_type: remote_file_type,
 						category: self.category,
 						overwrite: true,
 						..Default::default()
