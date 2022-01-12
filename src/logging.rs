@@ -15,7 +15,7 @@ static LEVELS: phf::Map<&'static str, LevelFilter> = phf_map! {
 static INVALID_LEVEL: &str = "Invalid log level provided via REVENG_LOG_LEVEL; valid levels are trace, debug, info, warn, error, off";
 
 static mut BASE_TIMESTAMP: Option<std::time::Instant> = None;
-static mut GLOBAL_LEVEL: LevelFilter = if cfg!(debug_assertions) { LevelFilter::Debug } else { LevelFilter::Info };
+static mut GLOBAL_LEVEL: LevelFilter = LevelFilter::Info;
 lazy_static! {
 	static ref LOCAL_LEVELS: RwLock<HashMap<String, LevelFilter>> = Default::default();
 }
