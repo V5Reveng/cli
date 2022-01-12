@@ -16,11 +16,11 @@ impl Runnable for Args {
 		println!("File type: {}", metadata.file_type);
 		println!("Last modified: {}", metadata.timestamp);
 		println!("Version: {}", metadata.version);
-		let is_link = metadata.linked_category != fs::Category::None;
-		println!("Is link? {}", is_link);
-		if is_link {
-			println!("Linked category: {}", metadata.linked_category);
-			println!("Linked filename: {}", metadata.linked_name);
+		println!("Is link: {}", metadata.is_link());
+		if let Some((link_category, link_name)) = metadata.get_link() {
+			println!("Linked category: {}", link_category);
+			println!("Linked filename: {}", link_name);
+		} else {
 		}
 		0
 	}

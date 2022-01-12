@@ -37,16 +37,26 @@ impl From<ExtendedDeviceInfoNew> for ExtendedDeviceInfo {
 
 #[derive(Decode, Debug)]
 pub struct FileMetadataByName {
-	/// TODO: find out what this field represents
-	pub linked_category: Category,
+	linked_category: Category,
 	pub size: FileSize,
 	pub address: Address,
 	pub crc: u32,
 	pub file_type: FileType,
 	pub timestamp: TimeStamp,
 	pub version: ShortVersion,
-	/// TODO: find out what this field represents
-	pub linked_name: FileName,
+	linked_name: FileName,
+}
+impl FileMetadataByName {
+	pub fn is_link(&self) -> bool {
+		self.linked_category != Category::None
+	}
+	pub fn get_link(&self) -> Option<(Category, &FileName)> {
+		if self.is_link() {
+			Some((self.linked_category, &self.linked_name))
+		} else {
+			None
+		}
+	}
 }
 #[derive(Decode, Debug)]
 pub struct FileMetadataByIndex {
