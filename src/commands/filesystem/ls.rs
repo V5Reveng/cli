@@ -39,16 +39,11 @@ fn list_in_category(dev: &mut Device, category: fs::Category) {
 }
 
 fn list_all_categories(dev: &mut Device) {
-	let mut num_empty = 0usize;
-	for i in 0..u8::MAX {
-		let category = fs::Category::from(i);
+	use fs::Category::*;
+	for category in [User, System, Pros, Rms, Mw] {
 		let files = dev.list_all_files(category).unwrap();
-		if files.is_empty() {
-			num_empty += 1;
-		} else {
-			println!("Category: {}", category);
-			print_file_list(&files);
-		}
+		println!("Category: {}", category);
+		print_file_list(&files);
+		println!();
 	}
-	println!("({} empty/nonexistent categories)", num_empty);
 }

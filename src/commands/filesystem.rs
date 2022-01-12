@@ -32,6 +32,7 @@ enum Commands {
 	/// Print file metadata.
 	Info(info::Args),
 	/// List files in a category, or all files.
+	/// Note: omitting the category will only list files in named categories.
 	Ls(ls::Args),
 	#[cfg(target_os = "linux")]
 	/// Mount the device as a FUSE filesystem.
