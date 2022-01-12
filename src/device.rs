@@ -1,6 +1,6 @@
 use crate::crc::CRCSerialPort;
 use core::any::type_name;
-use encde::Encode;
+use encde::{Decode, Encode};
 use log::{debug, trace, warn};
 use std::io::{Read, Write};
 use std::path::Path;
@@ -108,7 +108,8 @@ impl From<ProtocolError> for DeviceError {
 pub type Result<T> = std::result::Result<T, DeviceError>;
 
 #[repr(u8)]
-#[derive(num_enum::IntoPrimitive, num_enum::TryFromPrimitive, PartialEq, Eq, Debug)]
+#[must_use = "This may be a NACK, which should be handled"]
+#[derive(Encode, Decode, PartialEq, Eq, Debug)]
 pub enum ResponseByte {
 	Ack = 0x76,
 	GeneralNack = 0xff,
@@ -273,21 +274,9 @@ impl Device {
 			Ok(())
 		}
 	}
-	fn rx_response_byte(&mut self) -> Result<()> {
+	fn rx_response_byte(&mut self) -> Result<ResponseByte> {
 		debug!("rx response byte");
-		let response_byte: u8 = self.rx()?;
-		if let Ok(response_byte) = ResponseByte::try_from(response_byte) {
-			if response_byte != ResponseByte::Ack {
-				Err(DeviceError::Protocol(ProtocolError::Nack(response_byte)))
-			} else {
-				Ok(())
-			}
-		} else {
-			Err(DeviceError::Protocol(ProtocolError::InvalidEnumValue {
-				entity: "response byte",
-				value: response_byte.into(),
-			}))
-		}
+		self.rx()
 	}
 }
 
@@ -344,10 +333,14 @@ impl Device {
 		debug!("end extended command {:#02x}", sent_command);
 		// subtract response byte
 		let payload_len = self.rx_ext_command_header(sent_command)? - 1;
-		self.rx_response_byte()?;
+		let response_byte = self.rx_response_byte()?;
 		let raw_payload = self.rx_bytes(payload_len)?;
 		self.rx_ext_command_footer()?;
-		Self::decode_from_data(&raw_payload)
+		if response_byte == ResponseByte::Ack {
+			Self::decode_from_data(&raw_payload)
+		} else {
+			Err(ProtocolError::Nack(response_byte).into())
+		}
 	}
 }
 
