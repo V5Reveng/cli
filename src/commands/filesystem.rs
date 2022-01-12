@@ -24,7 +24,7 @@ impl Runnable for Args {
 #[derive(clap::Subcommand)]
 enum Commands {
 	/// Output the contents of a file.
-	/// To "pull" a file from the device, you can add ` > localfile` to the command line.
+	/// To "pull" a file from the device, you can add ` > local.file` to the command line.
 	Cat(cat::Args),
 	/// Edit file using $EDITOR.
 	Edit(edit::Args),
@@ -34,7 +34,7 @@ enum Commands {
 	/// Mount the device as a FUSE filesystem.
 	Mount(mount::Args),
 	/// Write stdin to a remote file.
-	/// To "push" a file to the device, you can add ` < localfile` to the command line.
+	/// To "push" a file to the device, you can add ` < local.file` to the command line.
 	Sponge(sponge::Args),
 	/// Delete a file.
 	Rm(rm::Args),
