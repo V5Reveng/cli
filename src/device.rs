@@ -386,17 +386,20 @@ impl Device {
 		self.rx_ext_command_footer()?;
 		Ok(())
 	}
-	fn ft_read(&mut self, stream: &mut dyn std::io::Write, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<()> {
+	/// Returns the CRC of the data that was read
+	fn ft_read(&mut self, stream: &mut dyn std::io::Write, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<u32> {
 		debug!("file transfer: read {} bytes from 0x{:0>8x}, max packet size is {}", size, base_address, max_packet_size);
 		let mut buffer = vec![0u8; max_packet_size as usize];
+		let mut crc = 0;
 		while size > 0 {
 			let this_packet_size = std::cmp::min(size as usize, max_packet_size as usize);
 			self.ft_read_single(&mut buffer[0..this_packet_size], base_address)?;
+			<u32 as crate::crc::CrcComputable>::update_crc(&mut crc, &buffer[0..this_packet_size]);
 			stream.write_all(&buffer[0..this_packet_size])?;
 			base_address += filesystem::Address::try_from(this_packet_size).unwrap();
 			size -= filesystem::FileSize::try_from(this_packet_size).unwrap();
 		}
-		Ok(())
+		Ok(crc)
 	}
 	fn ft_write_single(&mut self, data: &[u8], base_address: filesystem::Address) -> Result<()> {
 		const COMMAND_ID: CommandId = 0x13;
@@ -502,9 +505,13 @@ impl Device {
 			version: helpers::ShortVersion::new(1, 0, 0, 0),
 			name: *file_name,
 		})?;
-		self.ft_read(stream, size, address, transfer_info.max_packet_size)?;
+		let crc = self.ft_read(stream, size, address, transfer_info.max_packet_size)?;
 		self.end_file_transfer(filesystem::TransferCompleteAction::default())?;
-		Ok(())
+		if crc != transfer_info.crc {
+			Err(DeviceError::Protocol(ProtocolError::InvalidCrc))
+		} else {
+			Ok(())
+		}
 	}
 
 	pub fn write_file_from_stream(&mut self, stream: &mut dyn std::io::Read, file_name: &filesystem::FileName, file_type: &filesystem::FileType, size: filesystem::FileSize, crc: u32, args: &filesystem::WriteArgs) -> Result<()> {
