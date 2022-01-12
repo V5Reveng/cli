@@ -19,10 +19,10 @@ impl Runnable for Args {
 
 fn print_file_list(files: &[receive::FileMetadataByIndex]) {
 	println!("Num files: {}", files.len());
-	println!("Address      Mtime                       Version    Size  Type  Name\n");
+	println!("Address     Mtime                       Version  Size   Type  Name\n");
 	for metadata in files {
 		println!(
-			"0x{address:0>8x}  {mtime}  {version: >8}  {size: >4}  {ty: <4}  {name}",
+			"0x{address:0>8x}  {mtime}  {version: >8}  {size: <5}  {ty: <4}  {name}",
 			size = metadata.size,
 			address = metadata.address,
 			ty = metadata.file_type,
