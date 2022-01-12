@@ -1,6 +1,7 @@
 use crate::commands::Runnable;
 
 #[derive(clap::Parser)]
+/// Run a program.
 pub struct Args {
 	/// If true, the list is ignored.
 	#[clap(long)]

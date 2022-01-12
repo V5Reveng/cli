@@ -16,14 +16,11 @@ impl Runnable for Args {
 	}
 }
 
-/// Commands that query device information.
+/// Query device information.
 #[derive(clap::Subcommand)]
 enum Commands {
-	/// List connected devices.
 	Info(info::Args),
-	/// Print device info.
 	List(list::Args),
-	/// Take a screen capture of the device.
 	ScreenCapture(screen_capture::Args),
 }
 

@@ -19,20 +19,14 @@ impl super::Runnable for Args {
 	}
 }
 
-/// Program-related commands.
+/// Interact with programs and execution.
 #[derive(clap::Subcommand)]
 enum Commands {
-	/// Get info for a specific slot.
 	Info(info::Args),
-	/// List uploaded programs.
 	List(list::Args),
-	/// Remove (a) program(s).
-	Run(run::Args),
-	/// Run a program.
 	Remove(remove::Args),
-	/// Stop the running program.
+	Run(run::Args),
 	Stop(stop::Args),
-	/// Upload a program.
 	Upload(upload::Args),
 }
 

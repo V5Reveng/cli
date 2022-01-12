@@ -21,27 +21,17 @@ impl Runnable for Args {
 	}
 }
 
-/// Filesystem-related commands.
+/// Interact with the filesystem.
 #[derive(clap::Subcommand)]
 enum Commands {
-	/// Output the contents of a file.
-	/// To "pull" a file from the device, you can add ` > local.file` to the command line.
 	Cat(cat::Args),
-	/// Edit file using $EDITOR.
 	Edit(edit::Args),
-	/// Print file metadata.
 	Info(info::Args),
-	/// List files in a category, or all files.
-	/// Note: omitting the category will only list files in named categories.
 	Ls(ls::Args),
 	#[cfg(target_os = "linux")]
-	/// Mount the device as a FUSE filesystem.
 	Mount(mount::Args),
-	/// Write stdin to a remote file.
-	/// To "push" a file to the device, you can add ` < local.file` to the command line.
-	Sponge(sponge::Args),
-	/// Delete a file.
 	Rm(rm::Args),
+	Sponge(sponge::Args),
 }
 
 impl Runnable for Commands {

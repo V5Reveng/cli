@@ -2,6 +2,7 @@ use crate::commands::Runnable;
 use crate::device::filesystem as fs;
 
 #[derive(clap::Parser)]
+/// Delete a file.
 pub struct Args {
 	/// Remote file.
 	file: fs::QualFileName,

@@ -1,6 +1,7 @@
 use crate::commands::Runnable;
 
 #[derive(clap::Parser)]
+/// Get info for a specific slot.
 pub struct Args {
 	#[clap(long, group = "program")]
 	name: Option<String>,

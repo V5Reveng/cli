@@ -34,10 +34,12 @@ impl Runnable for Subcommand {
 #[clap(about, version, author)]
 struct Args {
 	#[clap(long = "verbose", short, parse(from_occurrences))]
+	/// Increase verbosity.
 	verbosity: usize,
-	/// Specify the path to the device. If there is only one device this is not necessary.
-	#[cfg_attr(target_family = "unix", doc = "e.g., /dev/ttyACM0")]
-	#[cfg_attr(target_family = "windows", doc = "e.g., COM1")]
+	/// Specify the path to the device
+	#[cfg_attr(target_family = "unix", doc = "e.g., /dev/ttyACM0.")]
+	#[cfg_attr(target_family = "windows", doc = "e.g., COM1.")]
+	/// Not necessary if there is only one device.
 	#[clap(long = "device", short)]
 	device_path: Option<PathBuf>,
 	#[clap(subcommand)]

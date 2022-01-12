@@ -1,6 +1,7 @@
 use crate::commands::Runnable;
 
 #[derive(clap::Parser)]
+/// Upload a program.
 pub struct Args {
 	/// Optionally override the name of the program when it's uploaded.
 	/// Defaults to the project name in Cargo.toml.

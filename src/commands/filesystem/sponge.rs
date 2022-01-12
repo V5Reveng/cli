@@ -4,13 +4,18 @@ use clap_num::maybe_hex;
 use std::io::{stdin, Read};
 
 #[derive(clap::Parser)]
+/// Write stdin to a remote file.
+///
+/// To "push" a file to the device, you can add ` < local.file` to the command line.
 pub struct Args {
 	/// Remote file.
 	file: fs::QualFile,
 	/// Whether to overwrite the file if it exists
 	#[clap(long = "force", short)]
 	overwrite: bool,
-	/// The address of the file. Only really matters for executables.
+	/// The address of the file.
+	///
+	/// Only really matters for executables.
 	/// If not specified and the remote file exists, use its address.
 	/// Otherwise, use a predefined address.
 	#[clap(long, parse(try_from_str=maybe_hex))]
