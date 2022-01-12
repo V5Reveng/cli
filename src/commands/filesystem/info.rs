@@ -17,7 +17,7 @@ impl Runnable for Args {
 			// print info for the file
 			let (file_name, _) = crate::commands::string_to_file_name_and_type(&file);
 			let send_data = send::FileMetadataByName::new(self.category, file_name);
-			let metadata = dev.get_file_metadata_by_name(&send_data).unwrap();
+			let metadata = dev.get_file_metadata_by_name(&send_data).unwrap().expect("File does not exist");
 			println!("Size: {}", metadata.size);
 			println!("Address: 0x{:0>8x}", metadata.address);
 			println!("File type: {}", metadata.file_type);

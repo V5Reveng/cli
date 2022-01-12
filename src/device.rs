@@ -459,12 +459,22 @@ impl Device {
 		}
 	}
 
-	pub fn get_file_metadata_by_name(&mut self, args: &send::FileMetadataByName) -> Result<receive::FileMetadataByName> {
+	pub fn get_file_metadata_by_name(&mut self, args: &send::FileMetadataByName) -> Result<Option<receive::FileMetadataByName>> {
 		debug!("sending get-file-metadata-by-name command");
-		self.ext_command_with_data::<_, receive::FileMetadataByName>(0x19, args)
+		let ret = self.ext_command_with_data::<_, receive::FileMetadataByName>(0x19, args);
+		match ret {
+			Ok(data) => Ok(Some(data)),
+			Err(DeviceError::Protocol(ProtocolError::Nack(ResponseByte::Enoent | ResponseByte::ProgramFileError))) => Ok(None),
+			Err(err) => Err(err),
+		}
 	}
-	pub fn get_file_metadata_by_index(&mut self, index: filesystem::FileIndex) -> Result<receive::FileMetadataByIndex> {
-		self.ext_command_with_data::<_, receive::FileMetadataByIndex>(0x17, &send::FileMetadataByIndex::new(index))
+	pub fn get_file_metadata_by_index(&mut self, index: filesystem::FileIndex) -> Result<Option<receive::FileMetadataByIndex>> {
+		let ret = self.ext_command_with_data::<_, receive::FileMetadataByIndex>(0x17, &send::FileMetadataByIndex::new(index));
+		match ret {
+			Ok(data) => Ok(Some(data)),
+			Err(DeviceError::Protocol(ProtocolError::Nack(ResponseByte::Enoent | ResponseByte::ProgramFileError))) => Ok(None),
+			Err(err) => Err(err),
+		}
 	}
 
 	pub fn num_files(&mut self, category: filesystem::Category) -> Result<isize> {
@@ -482,14 +492,16 @@ impl Device {
 		};
 		let mut ret = Vec::with_capacity(num_files as usize);
 		for i in 0..num_files {
-			ret.push(self.get_file_metadata_by_index(i)?)
+			ret.push(self.get_file_metadata_by_index(i)?.ok_or(DeviceError::Protocol(ProtocolError::Nack(ResponseByte::Enoent)))?)
 		}
 		Ok(ret)
 	}
 
 	pub fn read_file_to_stream(&mut self, stream: &mut dyn std::io::Write, file_name: &filesystem::FileName, file_type: &filesystem::FileType, args: &filesystem::ReadArgs) -> Result<()> {
 		debug!("reading file {}", file_name);
-		let file_metadata = self.get_file_metadata_by_name(&send::FileMetadataByName::new(args.category, *file_name))?;
+		let file_metadata = self
+			.get_file_metadata_by_name(&send::FileMetadataByName::new(args.category, *file_name))?
+			.ok_or(DeviceError::Protocol(ProtocolError::Nack(ResponseByte::Enoent)))?;
 		let size = args.size.unwrap_or(file_metadata.size);
 		let address = args.address.unwrap_or(file_metadata.address);
 		let transfer_info = self.start_file_transfer(&send::StartFileTransfer {
@@ -517,7 +529,7 @@ impl Device {
 	pub fn write_file_from_stream(&mut self, stream: &mut dyn std::io::Read, file_name: &filesystem::FileName, file_type: &filesystem::FileType, size: filesystem::FileSize, crc: u32, args: &filesystem::WriteArgs) -> Result<()> {
 		let address = match args.address {
 			Some(addr) => addr,
-			None => self.get_file_metadata_by_name(&send::FileMetadataByName::new(args.category, *file_name)).map(|x| x.address).unwrap_or(0x0780_0000),
+			None => self.get_file_metadata_by_name(&send::FileMetadataByName::new(args.category, *file_name))?.map(|x| x.address).unwrap_or(0x0780_0000),
 		};
 		let transfer_info = self.start_file_transfer(&send::StartFileTransfer {
 			function: filesystem::Function::Upload,
