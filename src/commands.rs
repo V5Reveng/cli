@@ -1,4 +1,3 @@
-use crate::device::filesystem as fs;
 use crate::device::Device;
 use crate::device::UploadableInfo;
 use crate::logging;
@@ -65,9 +64,4 @@ pub fn run() -> u32 {
 
 pub fn unwrap_device_presence(pres: Presence<Device>) -> Device {
 	pres.expect_one("No uploadable devices found.", "Multiple uploadable devices found. You can specify just one with the --device-path argument.")
-}
-
-/// panics on invalid
-pub fn string_to_file_name_and_type(s: &str) -> (fs::FileName, fs::FileType) {
-	(s.try_into().expect("File name is too long"), s.rsplit_once('.').map(|(_, ext)| ext).unwrap_or("").try_into().expect("File extension is too long"))
 }

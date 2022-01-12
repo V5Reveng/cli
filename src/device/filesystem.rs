@@ -9,15 +9,53 @@ pub enum Function {
 	Download = 2,
 }
 
-#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Copy)]
-#[repr(u8)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Category {
-	None = 0,
-	User = 1,
-	System = 15,
-	Rms = 16,
-	Pros = 24,
-	Mw = 32,
+	None,
+	User,
+	System,
+	Rms,
+	Pros,
+	Mw,
+	Unnamed(u8),
+}
+impl Encode for Category {
+	fn encode(&self, writer: &mut dyn std::io::Write) -> encde::Result<()> {
+		let value = u8::from(*self);
+		value.encode(writer)
+	}
+}
+impl From<u8> for Category {
+	fn from(value: u8) -> Self {
+		match value {
+			0 => Self::None,
+			1 => Self::User,
+			15 => Self::System,
+			16 => Self::Rms,
+			24 => Self::Pros,
+			32 => Self::Mw,
+			x => Self::Unnamed(x),
+		}
+	}
+}
+impl From<Category> for u8 {
+	fn from(value: Category) -> Self {
+		match value {
+			Category::None => 0,
+			Category::User => 1,
+			Category::System => 15,
+			Category::Rms => 16,
+			Category::Pros => 24,
+			Category::Mw => 32,
+			Category::Unnamed(x) => x,
+		}
+	}
+}
+impl Decode for Category {
+	fn decode(reader: &mut dyn std::io::Read) -> encde::Result<Self> {
+		let value = u8::decode(reader)?;
+		Ok(Self::from(value))
+	}
 }
 impl Default for Category {
 	fn default() -> Self {
@@ -33,6 +71,9 @@ impl std::fmt::Display for Category {
 			Self::Rms => "RobotMesh Studio",
 			Self::Pros => "PROS",
 			Self::Mw => "MW",
+			Self::Unnamed(x) => {
+				return write!(formatter, "0x{:02x}", x);
+			}
 		};
 		formatter.write_str(name)
 	}
@@ -41,12 +82,16 @@ impl std::str::FromStr for Category {
 	type Err = &'static str;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
+			"default" => Ok(Self::default()),
 			"user" => Ok(Self::User),
 			"system" => Ok(Self::System),
 			"rms" => Ok(Self::Rms),
 			"pros" => Ok(Self::Pros),
 			"mw" => Ok(Self::Mw),
-			_ => Err("Unknown file category. Possible categories are user, system, rms, pros, mw."),
+			s => match u8::from_str(s) {
+				Ok(x) => Ok(Self::Unnamed(x)),
+				Err(_) => Err("Unknown file category. Possible categories are default (user), user, system, rms, pros, mw, or an unnamed category as a number."),
+			},
 		}
 	}
 }
@@ -144,10 +189,10 @@ impl<const N: usize> Default for FixedString<N> {
 	}
 }
 impl<const N: usize> std::str::FromStr for FixedString<N> {
-	type Err = ();
+	type Err = &'static str;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		if s.len() > N {
-			return Err(());
+			return Err("String is too long");
 		}
 		let mut ret: Self = Self::default();
 		for (idx, byte) in s.bytes().chain(std::iter::repeat(0)).take(N).enumerate() {
@@ -205,9 +250,78 @@ pub type FileType = FixedString<4>;
 // This type is the same size as String so you might as well store it by value!
 pub type FileName = FixedString<24>;
 
+/// A qualified file name, that is, one with a category.
+#[derive(Debug)]
+pub struct QualFileName {
+	pub category: Category,
+	pub name: FileName,
+}
+impl std::str::FromStr for QualFileName {
+	type Err = &'static str;
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		if let Some((category, name)) = s.split_once(':') {
+			Ok(Self {
+				category: Category::from_str(category)?,
+				name: FileName::from_str(name)?,
+			})
+		} else {
+			Ok(Self {
+				category: Category::default(),
+				name: FileName::from_str(s)?,
+			})
+		}
+	}
+}
+impl std::fmt::Display for QualFileName {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(formatter, "{}:{}", self.category, self.name)
+	}
+}
+
+/// A qualified file, that is, one with a category and type.
+#[derive(Debug)]
+pub struct QualFile {
+	pub common: QualFileName,
+	pub ty: FileType,
+}
+impl std::str::FromStr for QualFile {
+	type Err = &'static str;
+	// by not implementing this in terms of QualFileName::from_str, we avoid the buffering and unbuffering through FileName instances, instead using &str until we actually need to write the data.
+	// &str is not actually much smaller than a FileName (16 bytes vs 24), but it allows for the easy and lightweight creation and manipulation of substrings.
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let mut ret_category = Category::default();
+		let mut ret_name = s;
+		let ret_ty;
+
+		// if there is a category, the ret_name will be the part after the colon
+		// e.g., user:slot_1.ini
+		if let Some((category, other)) = s.split_once(':') {
+			ret_category = Category::from_str(category)?;
+			ret_name = other;
+		}
+		// otherwise, the ret_name will be the whole string
+		// e.g., slot_1.ini
+
+		// then, using the name from the previous section, attempt to get the type
+		ret_ty = if let Some((_stem, ty)) = ret_name.rsplit_once('.') { ty } else { "bin" };
+
+		Ok(Self {
+			common: QualFileName {
+				category: ret_category,
+				name: FileName::from_str(ret_name)?,
+			},
+			ty: FileType::from_str(ret_ty)?,
+		})
+	}
+}
+impl std::fmt::Display for QualFile {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		write!(formatter, "{} (type: {})", self.common, self.ty)
+	}
+}
+
 #[derive(Default)]
 pub struct ReadArgs {
-	pub category: Category,
 	pub target: Target,
 	pub address: Option<Address>,
 	pub size: Option<FileSize>,
@@ -216,7 +330,6 @@ pub struct ReadArgs {
 #[derive(Default)]
 pub struct WriteArgs {
 	pub action: TransferCompleteAction,
-	pub category: Category,
 	pub target: Target,
 	pub address: Option<Address>,
 	pub overwrite: bool,
@@ -228,6 +341,5 @@ pub struct WriteArgs {
 
 #[derive(Default)]
 pub struct DeleteArgs {
-	pub category: Category,
 	pub include_linked: bool,
 }

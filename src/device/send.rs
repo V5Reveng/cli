@@ -1,4 +1,5 @@
-use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, Function, PacketSize, Target, TimeStamp};
+use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, Function, PacketSize, QualFileName, Target, TimeStamp};
+use super::helpers::ShortVersion;
 use encde::Encode;
 
 #[derive(Encode)]
@@ -8,8 +9,12 @@ pub struct FileMetadataByName {
 	pub name: FileName,
 }
 impl FileMetadataByName {
-	pub fn new(category: Category, name: FileName) -> Self {
-		Self { category, options: 0, name }
+	pub fn new(data: &QualFileName) -> Self {
+		Self {
+			category: data.category,
+			options: 0,
+			name: data.name,
+		}
 	}
 }
 
@@ -36,9 +41,8 @@ impl NumFiles {
 	}
 }
 
-use super::helpers::ShortVersion;
 #[derive(Encode)]
-pub struct StartFileTransfer {
+pub(super) struct StartFileTransfer {
 	pub function: Function,
 	pub target: Target,
 	pub category: Category,
@@ -61,6 +65,15 @@ pub(super) struct FileTransferRead {
 #[derive(Encode)]
 pub(super) struct DeleteFile {
 	pub category: Category,
-	pub options: u8,
+	options: u8,
 	pub name: FileName,
+}
+impl DeleteFile {
+	pub(super) fn new(data: &QualFileName, include_linked: bool) -> Self {
+		Self {
+			category: data.category,
+			options: if include_linked { 0b10_00_00_00 } else { 0 },
+			name: data.name,
+		}
+	}
 }

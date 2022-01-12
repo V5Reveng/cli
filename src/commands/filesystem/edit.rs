@@ -8,11 +8,7 @@ use std::{fs, process};
 
 #[derive(clap::Parser)]
 pub struct Args {
-	/// Remote filename.
-	file: String,
-	/// The category of the file. Can be user, system, pros, rms, mw
-	#[clap(long, short, default_value_t = Default::default())]
-	category: dev_fs::Category,
+	file: dev_fs::QualFile,
 }
 
 impl Runnable for Args {
@@ -20,20 +16,18 @@ impl Runnable for Args {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 
 		// do this now so it fails before we do IO
-		let (remote_file_name, remote_file_type) = crate::commands::string_to_file_name_and_type(&self.file);
 		let editor = std::env::var("EDITOR").expect("Reading EDITOR env var");
 
 		// prepare temporary environment
 		let work_dir = TempDir::new().expect("Creating temporary directory");
-		let to_edit_name = work_dir.join(&self.file);
-		let backup_name = work_dir.join(self.file + ".old");
+		let file_name_str = self.file.common.name.as_str().unwrap();
+		let to_edit_name = work_dir.join(file_name_str);
+		let backup_name = work_dir.join(file_name_str.to_owned() + ".old");
 
 		// read into the temporary file
 		{
 			let mut to_edit_file = fs::File::create(&to_edit_name).expect("Creating local copy file");
-			dev
-				.read_file_to_stream(&mut to_edit_file, &remote_file_name, &remote_file_type, &dev_fs::ReadArgs { category: self.category, ..Default::default() })
-				.expect("Could not read file from device");
+			dev.read_file_to_stream(&mut to_edit_file, &self.file, &dev_fs::ReadArgs::default()).expect("Could not read file from device");
 		}
 
 		// make a backup
@@ -74,15 +68,10 @@ impl Runnable for Args {
 			dev
 				.write_file_from_stream(
 					&mut edited_file,
-					&remote_file_name,
-					&remote_file_type,
+					&self.file,
 					edited_len.try_into().expect("Edited file is too large"),
 					edited_crc,
-					&dev_fs::WriteArgs {
-						category: self.category,
-						overwrite: true,
-						..Default::default()
-					},
+					&dev_fs::WriteArgs { overwrite: true, ..Default::default() },
 				)
 				.expect("Writing edited file");
 		}

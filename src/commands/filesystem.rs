@@ -3,6 +3,7 @@ use crate::commands::Runnable;
 mod cat;
 mod edit;
 mod info;
+mod ls;
 #[cfg(target_os = "linux")]
 mod mount;
 mod rm;
@@ -28,8 +29,10 @@ enum Commands {
 	Cat(cat::Args),
 	/// Edit file using $EDITOR.
 	Edit(edit::Args),
-	/// List files with no argument; print file metadata with an argument.
+	/// Print file metadata.
 	Info(info::Args),
+	/// List files in a category, or all files.
+	Ls(ls::Args),
 	#[cfg(target_os = "linux")]
 	/// Mount the device as a FUSE filesystem.
 	Mount(mount::Args),
@@ -46,6 +49,7 @@ impl Runnable for Commands {
 			Commands::Cat(args) => args.run(dev),
 			Commands::Edit(args) => args.run(dev),
 			Commands::Info(args) => args.run(dev),
+			Commands::Ls(args) => args.run(dev),
 			Commands::Mount(args) => args.run(dev),
 			Commands::Rm(args) => args.run(dev),
 			Commands::Sponge(args) => args.run(dev),
