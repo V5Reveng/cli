@@ -85,9 +85,6 @@ impl CRCSerialPort {
 	pub fn port(&self) -> &dyn SerialPort {
 		&*self.underlying
 	}
-	pub fn port_mut(&mut self) -> &mut dyn SerialPort {
-		&mut *self.underlying
-	}
 	pub fn begin_tx_crc(&mut self) {
 		trace!("begin tx crc");
 		self.tx_crc = 0;

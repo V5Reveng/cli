@@ -67,7 +67,6 @@ pub enum ProtocolError {
 	WrongData { entity: &'static str, expected: Box<[u8]>, received: Box<[u8]> },
 	BadLength { entity: &'static str, received_length: usize },
 	OutOfRange { entity: &'static str, min: usize, max: usize, actual: usize },
-	InvalidEnumValue { entity: &'static str, value: usize },
 	Nack(ResponseByte),
 	InvalidCrc,
 }
@@ -439,10 +438,6 @@ impl Device {
 }
 
 impl Device {
-	pub fn device_type(&self) -> UploadableType {
-		self.ty
-	}
-
 	/// Get the basic device information: version and product.
 	pub fn device_info(&mut self) -> Result<receive::DeviceInfo> {
 		debug!("sending device info command");
@@ -517,11 +512,6 @@ impl Device {
 		self.ft_read(stream, size, address, transfer_info.max_packet_size)?;
 		self.end_file_transfer(filesystem::TransferCompleteAction::default())?;
 		Ok(())
-	}
-	pub fn read_file_to_vec(&mut self, args: &filesystem::ReadArgs) -> Result<Vec<u8>> {
-		let mut stream = if let Some(size) = args.size { encde::util::VecWriter::with_capacity(size as usize) } else { encde::util::VecWriter::new() };
-		self.read_file_to_stream(&mut stream, args)?;
-		Ok(stream.into_inner())
 	}
 	pub fn write_file_from_stream(&mut self, stream: &mut dyn std::io::Read, size: filesystem::FileSize, crc: u32, args: &filesystem::WriteArgs) -> Result<()> {
 		let address = match args.address {
