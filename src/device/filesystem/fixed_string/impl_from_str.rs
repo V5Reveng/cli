@@ -1,7 +1,10 @@
-use super::{FixedString, FixedStringFromStrError};
+use super::{FixedString, FixedStringFromStrError as Error};
+use std::convert::TryFrom;
+use std::ffi::OsStr;
+use std::str::FromStr;
 
-impl<const N: usize> std::str::FromStr for FixedString<N> {
-	type Err = FixedStringFromStrError;
+impl<const N: usize> FromStr for FixedString<N> {
+	type Err = Error;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		if s.len() > N {
 			return Err(Self::Err::TooLong);
@@ -13,15 +16,15 @@ impl<const N: usize> std::str::FromStr for FixedString<N> {
 		Ok(ret)
 	}
 }
-impl<const N: usize> std::convert::TryFrom<&str> for FixedString<N> {
-	type Error = <Self as std::str::FromStr>::Err;
+impl<const N: usize> TryFrom<&str> for FixedString<N> {
+	type Error = <Self as FromStr>::Err;
 	fn try_from(s: &str) -> Result<Self, Self::Error> {
-		<Self as std::str::FromStr>::from_str(s)
+		Self::from_str(s)
 	}
 }
-impl<const N: usize> std::convert::TryFrom<&std::ffi::OsStr> for FixedString<N> {
-	type Error = FixedStringFromStrError;
-	fn try_from(s: &std::ffi::OsStr) -> Result<Self, Self::Error> {
-		<Self as std::str::FromStr>::from_str(s.to_str().ok_or(Self::Error::InvalidUnicode)?)
+impl<const N: usize> TryFrom<&OsStr> for FixedString<N> {
+	type Error = Error;
+	fn try_from(s: &OsStr) -> Result<Self, Self::Error> {
+		Self::from_str(s.to_str().ok_or(Self::Error::InvalidUnicode)?)
 	}
 }

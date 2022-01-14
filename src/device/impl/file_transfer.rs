@@ -1,7 +1,8 @@
 use crate::device::r#impl::{receive as priv_receive, send as priv_send, CommandId};
 use crate::device::{filesystem, Device, DeviceError, ProtocolError, Result};
+use encde::Decode;
 use log::debug;
-use std::io::Read;
+use std::io::{Read, Write};
 
 fn pad(size: filesystem::PacketSize) -> filesystem::PacketSize {
 	const BITS: filesystem::PacketSize = 4 - 1;
@@ -24,7 +25,7 @@ impl Device {
 		let send = priv_send::FileTransferRead { address: base_address, size: amount_to_read };
 		self.begin_ext_command(COMMAND_ID, &encde::util::encode_to_vec(&send)?)?;
 		let payload_len = self.rx_ext_command_header(COMMAND_ID)? - std::mem::size_of::<u32>();
-		let _address = <u32 as encde::Decode>::decode(&mut self.port)?;
+		let _address = <u32 as Decode>::decode(&mut self.port)?;
 		if payload_len != amount_to_read as usize {
 			return Err(DeviceError::Protocol(ProtocolError::BadLength {
 				entity: "file transfer read packet",
@@ -37,7 +38,7 @@ impl Device {
 		Ok(())
 	}
 	/// Returns the CRC of the data that was read
-	pub fn ft_read(&mut self, stream: &mut dyn std::io::Write, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<u32> {
+	pub fn ft_read(&mut self, stream: &mut dyn Write, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<u32> {
 		debug!("file transfer: read {} bytes from 0x{:0>8x}, max packet size is {}", size, base_address, max_packet_size);
 		let mut buffer = vec![0u8; max_packet_size as usize];
 		let mut crc = 0;
@@ -64,7 +65,7 @@ impl Device {
 		self.end_ext_command::<()>(COMMAND_ID)?;
 		Ok(())
 	}
-	pub fn ft_write(&mut self, stream: &mut dyn std::io::Read, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<()> {
+	pub fn ft_write(&mut self, stream: &mut dyn Read, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<()> {
 		debug!("file transfer: write {} to 0x{:0>8x}, max packet size is {}", size, base_address, max_packet_size);
 		let mut buffer = vec![0u8; max_packet_size as usize];
 		while size > 0 {

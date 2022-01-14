@@ -4,7 +4,7 @@ use crate::device::filesystem as dev_fs;
 use crate::util::diff::files_differ_and_f1_len;
 use crate::util::temp_dir::TempDir;
 use log::{error, warn};
-use std::io::{self, Read, Seek};
+use std::io::{Read, Seek};
 use std::{fs, process};
 
 /// Edit a file using $EDITOR.
@@ -65,9 +65,8 @@ impl Runnable for Args {
 
 		// write back the edited file
 		{
-			edited_file.seek(io::SeekFrom::Start(0)).expect("Rewinding edited file to beginning");
 			let edited_crc = crc32_from_file(&mut edited_file).expect("Calculating edited file CRC");
-			edited_file.seek(io::SeekFrom::Start(0)).expect("Rewinding edited file to beginning");
+			edited_file.rewind().expect("Rewinding edited file to beginning");
 			dev.write_file_from_stream(
 				&mut edited_file,
 				&self.file,
@@ -83,6 +82,7 @@ impl Runnable for Args {
 }
 
 fn crc32_from_file(f: &mut fs::File) -> std::io::Result<u32> {
+	f.rewind()?;
 	let mut buf = [0u8; 1024];
 	let mut crc = 0u32;
 	loop {

@@ -8,7 +8,7 @@ const SERIAL_BAUD: u32 = 115200;
 
 impl<'a> TryFrom<&'a Path> for Device {
 	type Error = <UploadableInfo as TryFrom<&'a Path>>::Error;
-	fn try_from(path: &'a Path) -> std::result::Result<Self, Self::Error> {
+	fn try_from(path: &'a Path) -> Result<Self, Self::Error> {
 		UploadableInfo::try_from(path).map(Device::from)
 	}
 }

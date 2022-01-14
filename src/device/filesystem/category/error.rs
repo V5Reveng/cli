@@ -1,9 +1,11 @@
+use std::fmt::{self, Display, Formatter};
+
 #[derive(Debug)]
 pub enum CategoryFromStrError {
 	UnknownCategory,
 }
-impl std::fmt::Display for CategoryFromStrError {
-	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl Display for CategoryFromStrError {
+	fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
 		let s = match self {
 			Self::UnknownCategory => "unknown category",
 		};

@@ -1,4 +1,6 @@
 use encde::{Decode, Encode};
+use std::cmp::{Ordering, PartialEq, PartialOrd};
+use std::fmt::{self, Debug, Display, Formatter};
 
 #[derive(Encode, Decode, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct ShortVersion {
@@ -12,8 +14,8 @@ impl ShortVersion {
 		Self { major, minor, patch, build_major }
 	}
 }
-impl std::fmt::Display for ShortVersion {
-	fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for ShortVersion {
+	fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
 		write!(formatter, "{}.{}.{}-{}", self.major, self.minor, self.patch, self.build_major)
 	}
 }
@@ -31,8 +33,8 @@ impl LongVersion {
 		}
 	}
 }
-impl std::fmt::Display for LongVersion {
-	fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for LongVersion {
+	fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
 		write!(formatter, "{}.{}", self.common, self.build_minor)
 	}
 }
@@ -43,14 +45,14 @@ impl From<LongVersion> for ShortVersion {
 	}
 }
 
-impl std::cmp::PartialEq<LongVersion> for ShortVersion {
+impl PartialEq<LongVersion> for ShortVersion {
 	fn eq(&self, other: &LongVersion) -> bool {
 		self == &other.common
 	}
 }
 
-impl std::cmp::PartialOrd<LongVersion> for ShortVersion {
-	fn partial_cmp(&self, other: &LongVersion) -> Option<std::cmp::Ordering> {
+impl PartialOrd<LongVersion> for ShortVersion {
+	fn partial_cmp(&self, other: &LongVersion) -> Option<Ordering> {
 		Some(self.cmp(&other.common))
 	}
 }

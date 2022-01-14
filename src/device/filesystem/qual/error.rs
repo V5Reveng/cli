@@ -1,4 +1,5 @@
 use super::super::{CategoryFromStrError, FixedStringFromStrError};
+use std::fmt::{self, Display, Formatter};
 
 #[derive(Debug)]
 pub enum QualFileFromStrError {
@@ -6,12 +7,13 @@ pub enum QualFileFromStrError {
 	FileName(FixedStringFromStrError),
 	FileType(FixedStringFromStrError),
 }
-impl std::fmt::Display for QualFileFromStrError {
-	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+
+impl Display for QualFileFromStrError {
+	fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
 		match self {
 			Self::Category(e) => {
 				formatter.write_str("invalid category: ")?;
-				std::fmt::Display::fmt(e, formatter)
+				e.fmt(formatter)
 			}
 			Self::FileName(e) => {
 				formatter.write_str("invalid file name: ")?;
@@ -24,4 +26,5 @@ impl std::fmt::Display for QualFileFromStrError {
 		}
 	}
 }
+
 impl std::error::Error for QualFileFromStrError {}

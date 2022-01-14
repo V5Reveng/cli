@@ -1,7 +1,8 @@
 use super::Category;
+use std::fmt::{self, Display, Formatter};
 
-impl std::fmt::Display for Category {
-	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl Display for Category {
+	fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
 		let name = match self {
 			Self::None => "(none)",
 			Self::User => "user",

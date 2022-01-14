@@ -1,8 +1,9 @@
 use super::super::{Category, FileName, FileType};
-use super::{QualFile, QualFileFromStrError, QualFileName};
+use super::{QualFile, QualFileFromStrError as Error, QualFileName};
+use std::str::FromStr;
 
-impl std::str::FromStr for QualFileName {
-	type Err = QualFileFromStrError;
+impl FromStr for QualFileName {
+	type Err = Error;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		if let Some((category, name)) = s.split_once(':') {
 			Ok(Self {
@@ -18,8 +19,8 @@ impl std::str::FromStr for QualFileName {
 	}
 }
 
-impl std::str::FromStr for QualFile {
-	type Err = QualFileFromStrError;
+impl FromStr for QualFile {
+	type Err = Error;
 	// by not implementing this in terms of QualFileName::from_str, we avoid the buffering and unbuffering through FileName instances, instead using &str until we actually need to write the data.
 	// &str is not actually much smaller than a FileName (16 bytes vs 24), but it allows for the easy and lightweight creation and manipulation of substrings.
 	fn from_str(s: &str) -> Result<Self, Self::Err> {

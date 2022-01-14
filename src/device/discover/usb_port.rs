@@ -1,12 +1,12 @@
-use serialport::{available_ports, SerialPortType};
+use serialport::{available_ports, Result, SerialPortType, UsbPortInfo};
 
 #[derive(Debug)]
 pub struct UsbPort {
 	pub name: String,
-	pub info: serialport::UsbPortInfo,
+	pub info: UsbPortInfo,
 }
 
-pub fn get_usb_devices() -> serialport::Result<Vec<UsbPort>> {
+pub fn get_usb_devices() -> Result<Vec<UsbPort>> {
 	let raw = available_ports()?;
 	Ok(raw
 		.into_iter()

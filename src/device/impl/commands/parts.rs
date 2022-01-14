@@ -1,5 +1,6 @@
 use crate::device::r#impl::CommandId;
 use crate::device::{Device, DeviceError, ProtocolError, ResponseByte, Result};
+use encde::Decode;
 use log::{debug, trace};
 
 impl Device {
@@ -9,7 +10,7 @@ impl Device {
 		self.tx(&command_id)?;
 		Ok(())
 	}
-	pub fn end_simple_command<T: encde::Decode>(&mut self, command_id: CommandId) -> Result<T> {
+	pub fn end_simple_command<T: Decode>(&mut self, command_id: CommandId) -> Result<T> {
 		debug!("end simple command {:#02x}", command_id);
 		self.rx_response_header()?;
 		self.rx_echoed_command(command_id)?;
@@ -51,7 +52,7 @@ impl Device {
 			Err(DeviceError::Protocol(ProtocolError::InvalidCrc))
 		}
 	}
-	pub fn end_ext_command<T: encde::Decode>(&mut self, sent_command: CommandId) -> Result<T> {
+	pub fn end_ext_command<T: Decode>(&mut self, sent_command: CommandId) -> Result<T> {
 		debug!("end extended command {:#02x}", sent_command);
 		// subtract response byte
 		let payload_len = self.rx_ext_command_header(sent_command)? - 1;

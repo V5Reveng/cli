@@ -1,5 +1,7 @@
 use crate::device::r#impl::CommandId;
 use crate::device::{Device, DeviceError, ProtocolError, ResponseByte, Result};
+use encde::util::{decode_from_entire_slice, encode_to_vec};
+use encde::{Decode, Encode};
 use log::{debug, trace};
 use std::io::Read;
 
@@ -54,10 +56,10 @@ impl Device {
 		let payload_length = self.rx_simple_payload_length()?;
 		self.rx_bytes(payload_length)
 	}
-	pub fn decode_from_data<T: encde::Decode>(data: &[u8]) -> Result<T> {
-		Ok(encde::util::decode_from_entire_slice(data)?)
+	pub fn decode_from_data<T: Decode>(data: &[u8]) -> Result<T> {
+		Ok(decode_from_entire_slice(data)?)
 	}
-	pub fn rx_simple_payload<T: encde::Decode>(&mut self) -> Result<T> {
+	pub fn rx_simple_payload<T: Decode>(&mut self) -> Result<T> {
 		debug!("rx simple payload");
 		let raw = self.rx_simple_raw_payload()?;
 		Self::decode_from_data(&raw)
@@ -90,13 +92,13 @@ impl Device {
 		debug!("rx extended payload length");
 		Ok(ret)
 	}
-	pub fn rx_expect<T: encde::Decode + encde::Encode + PartialEq + std::fmt::Debug>(&mut self, entity: &'static str, expected: &T) -> Result<()> {
+	pub fn rx_expect<T: Decode + Encode + PartialEq + std::fmt::Debug>(&mut self, entity: &'static str, expected: &T) -> Result<()> {
 		let received = self.rx::<T>()?;
 		if &received != expected {
 			Err(DeviceError::Protocol(ProtocolError::WrongData {
 				entity,
-				expected: encde::util::encode_to_vec(expected)?.into(),
-				received: encde::util::encode_to_vec(&received)?.into(),
+				expected: encode_to_vec(expected)?.into(),
+				received: encode_to_vec(&received)?.into(),
 			}))
 		} else {
 			trace!("rx {}, expecting value {:?}", entity, expected);

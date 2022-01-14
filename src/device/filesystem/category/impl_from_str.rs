@@ -1,6 +1,7 @@
 use super::{Category, CategoryFromStrError};
+use std::str::FromStr;
 
-impl std::str::FromStr for Category {
+impl FromStr for Category {
 	type Err = CategoryFromStrError;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {

@@ -31,11 +31,12 @@ impl From<std::io::Error> for DeviceError {
 }
 impl From<serialport::Error> for DeviceError {
 	fn from(err: serialport::Error) -> Self {
+		use serialport::ErrorKind::*;
 		match err.kind {
-			serialport::ErrorKind::Io(kind) => Self::IO(kind.into()),
-			serialport::ErrorKind::InvalidInput => Self::Serial(SerialError::InvalidInput),
-			serialport::ErrorKind::NoDevice => Self::Serial(SerialError::NoDevice),
-			serialport::ErrorKind::Unknown => Self::Serial(SerialError::Unknown),
+			Io(kind) => Self::IO(kind.into()),
+			InvalidInput => Self::Serial(SerialError::InvalidInput),
+			NoDevice => Self::Serial(SerialError::NoDevice),
+			Unknown => Self::Serial(SerialError::Unknown),
 		}
 	}
 }

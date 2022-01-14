@@ -1,3 +1,5 @@
+use std::fmt::{self, Debug, Formatter};
+
 pub mod discover;
 pub mod error;
 pub mod filesystem;
@@ -15,8 +17,8 @@ pub struct Device {
 	ty: UploadableType,
 	port: crate::crc::CRCSerialPort,
 }
-impl std::fmt::Debug for Device {
-	fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Debug for Device {
+	fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
 		write!(formatter, "Device of type {} at {}", self.ty, self.port.port().name().unwrap_or_else(|| "(unknown)".to_owned()))
 	}
 }

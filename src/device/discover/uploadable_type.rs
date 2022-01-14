@@ -5,9 +5,10 @@ pub enum UploadableType {
 }
 impl std::fmt::Display for UploadableType {
 	fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+		use UploadableType::*;
 		fmt.write_str(match self {
-			UploadableType::Brain => "brain",
-			UploadableType::Controller => "controller",
+			Brain => "brain",
+			Controller => "controller",
 		})
 	}
 }

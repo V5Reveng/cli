@@ -1,4 +1,5 @@
 use encde::Decode;
+use std::fmt::{self, Display, Formatter};
 
 pub mod version;
 pub use version::{LongVersion, ShortVersion};
@@ -26,8 +27,8 @@ pub enum Product {
 	Controller(ControllerFlags),
 }
 
-impl std::fmt::Display for Product {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for Product {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
 		match self {
 			Self::Brain(_) => f.write_str("brain"),
 			Self::Controller(flags) => write!(f, "controller (connected: {})", flags.connected()),

@@ -1,5 +1,6 @@
 use super::{BASE_TIMESTAMP, LOCAL_LEVELS};
 use log::{Level, Log, Metadata, Record};
+use std::io::Write;
 
 static CRATE_PREFIX: &str = "reveng_cli::";
 
@@ -33,6 +34,6 @@ impl Log for SimpleLogger {
 		);
 	}
 	fn flush(&self) {
-		let _ = std::io::Write::flush(&mut std::io::stderr());
+		let _ = std::io::stderr().flush();
 	}
 }

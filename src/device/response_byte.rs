@@ -1,4 +1,5 @@
 use encde::{Decode, Encode};
+use std::fmt::{self, Display, Formatter};
 
 #[repr(u8)]
 #[must_use = "This may be a NACK, which should be handled"]
@@ -42,24 +43,25 @@ pub enum ResponseByte {
 	Eexist = 0xdb,
 }
 
-impl std::fmt::Display for ResponseByte {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Display for ResponseByte {
+	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+		use ResponseByte::*;
 		f.write_str(match self {
-			Self::Ack => "Ack",
-			Self::GeneralNack => "General Nack",
-			Self::ReceivedCrcError => "Received CRC error",
-			Self::PayloadTooSmall => "Payload too small",
-			Self::RequestedTransferTooLarge => "Requested transfer too large",
-			Self::ProgramCrcError => "Program CRC error",
-			Self::ProgramFileError => "Program file error",
-			Self::UninitializedUploadDownload => "Uninitialized upload download",
-			Self::InitInvalidForFunction => "Initialization invalid for function",
-			Self::DataNotAligned => "Data not aligned",
-			Self::PacketAddressWrong => "Packet address wrong",
-			Self::DownloadedLengthWrong => "Downloaded length wrong",
-			Self::Enoent => "No such file or directory",
-			Self::Enospc => "No space left on device",
-			Self::Eexist => "File exists",
+			Ack => "Ack",
+			GeneralNack => "General Nack",
+			ReceivedCrcError => "Received CRC error",
+			PayloadTooSmall => "Payload too small",
+			RequestedTransferTooLarge => "Requested transfer too large",
+			ProgramCrcError => "Program CRC error",
+			ProgramFileError => "Program file error",
+			UninitializedUploadDownload => "Uninitialized upload download",
+			InitInvalidForFunction => "Initialization invalid for function",
+			DataNotAligned => "Data not aligned",
+			PacketAddressWrong => "Packet address wrong",
+			DownloadedLengthWrong => "Downloaded length wrong",
+			Enoent => "No such file or directory",
+			Enospc => "No space left on device",
+			Eexist => "File exists",
 		})
 	}
 }

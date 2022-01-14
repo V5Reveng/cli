@@ -1,6 +1,6 @@
 use super::classification::{classify, Classification};
 use super::usb_port::{get_usb_devices, UsbPort};
-use super::{UploadableInfoFromPathError, UploadableType};
+use super::{UploadableInfoFromPathError as FPError, UploadableType};
 use std::path::Path;
 
 pub struct UploadableInfo {
@@ -27,14 +27,14 @@ impl TryFrom<UsbPort> for UploadableInfo {
 }
 
 impl TryFrom<&Path> for UploadableInfo {
-	type Error = UploadableInfoFromPathError;
+	type Error = FPError;
 	fn try_from(path: &Path) -> Result<Self, Self::Error> {
 		//! FIXME this might be able to be improved
 		if !path.exists() {
-			return Err(UploadableInfoFromPathError::Nonexistent);
+			return Err(FPError::Nonexistent);
 		}
-		let path = path.to_str().ok_or(UploadableInfoFromPathError::PathNotUTF8)?;
-		Self::get_all().map_err(UploadableInfoFromPathError::from)?.into_iter().find(|port| port.name == path).ok_or(UploadableInfoFromPathError::NotValid)
+		let path = path.to_str().ok_or(FPError::PathNotUTF8)?;
+		Self::get_all().map_err(FPError::from)?.into_iter().find(|port| port.name == path).ok_or(FPError::NotValid)
 	}
 }
 
