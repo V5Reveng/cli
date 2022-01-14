@@ -381,6 +381,15 @@ impl Device {
 	}
 }
 
+/// Pad up to 4 byte boundary
+fn pad(size: filesystem::PacketSize) -> filesystem::PacketSize {
+	const BITS: filesystem::PacketSize = 4 - 1;
+	let base = size & !BITS;
+	let extra = size & BITS;
+	let extra = if extra > 0 { 4 } else { 0 };
+	base + extra
+}
+
 impl Device {
 	fn start_file_transfer(&mut self, args: &send::StartFileTransfer) -> Result<receive::StartFileTransfer> {
 		debug!("start file transfer");
@@ -389,8 +398,7 @@ impl Device {
 	fn ft_read_single(&mut self, data: &mut [u8], base_address: filesystem::Address) -> Result<()> {
 		const COMMAND_ID: CommandId = 0x14;
 		let amount_to_read: filesystem::PacketSize = data.len().try_into().expect("Buffer is too large to read with ft_read_single");
-		// pad to 4 bytes
-		let amount_to_read = (amount_to_read + 4) & !(4 - 1);
+		let amount_to_read = pad(amount_to_read);
 		debug!("file transfer: rx chunk of {} (padded to {}) bytes", data.len(), amount_to_read);
 		let send = send::FileTransferRead { address: base_address, size: amount_to_read };
 		self.begin_ext_command(COMMAND_ID, &encde::util::encode_to_vec(&send)?)?;
@@ -425,8 +433,7 @@ impl Device {
 	fn ft_write_single(&mut self, data: &[u8], base_address: filesystem::Address) -> Result<()> {
 		const COMMAND_ID: CommandId = 0x13;
 		let amount_to_write: filesystem::PacketSize = data.len().try_into().expect("Buffer is too large to write with ft_write_single");
-		// pad to 4 bytes
-		let amount_to_write = (amount_to_write + 4) & !(4 - 1);
+		let amount_to_write = pad(amount_to_write);
 		debug!("file transfer: rx chunk of {} (padded to {}) bytes", data.len(), amount_to_write);
 		self.tx_ext_command_header(COMMAND_ID, std::mem::size_of_val(&base_address) + amount_to_write as usize)?;
 		base_address.encode(&mut self.port)?;
