@@ -7,8 +7,8 @@ use log::{error, warn};
 use std::io::{self, Read, Seek};
 use std::{fs, process};
 
-#[derive(clap::Parser)]
 /// Edit a file using $EDITOR.
+#[derive(clap::Parser)]
 pub struct Args {
 	/// Remote file.
 	file: dev_fs::QualFile,

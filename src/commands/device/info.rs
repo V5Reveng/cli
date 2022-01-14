@@ -1,7 +1,7 @@
 use crate::commands::Runnable;
 
-#[derive(clap::Parser)]
 /// List connected devices.
+#[derive(clap::Parser)]
 pub struct Args {}
 
 impl Runnable for Args {

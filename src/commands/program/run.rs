@@ -1,7 +1,7 @@
 use crate::commands::Runnable;
 
-#[derive(clap::Parser)]
 /// Remove (a) program(s).
+#[derive(clap::Parser)]
 pub struct Args {
 	/// Not required if there is only one program, or if the current directory is a project. If the latter is true, the program will only be run, not uploaded; if the program has not yet been uploaded an error will occur.
 	#[clap(long, group = "program")]

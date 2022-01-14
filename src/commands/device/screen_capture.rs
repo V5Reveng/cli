@@ -1,7 +1,7 @@
 use crate::commands::Runnable;
 
-#[derive(clap::Parser)]
 /// Take a screen capture of the device.
+#[derive(clap::Parser)]
 pub struct Args {}
 
 impl Runnable for Args {

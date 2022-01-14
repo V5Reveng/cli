@@ -1,7 +1,7 @@
 use crate::commands::Runnable;
 
-#[derive(clap::Parser)]
 /// List uploaded programs.
+#[derive(clap::Parser)]
 pub struct Args {}
 
 impl Runnable for Args {

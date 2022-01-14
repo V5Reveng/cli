@@ -3,10 +3,10 @@ use crate::device::filesystem as fs;
 use clap_num::maybe_hex;
 use std::io::{stdin, Read};
 
-#[derive(clap::Parser)]
 /// Write stdin to a remote file.
 ///
 /// To "push" a file to the device, you can add ` < local.file` to the command line.
+#[derive(clap::Parser)]
 pub struct Args {
 	/// Remote file.
 	file: fs::QualFile,

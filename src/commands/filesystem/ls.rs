@@ -1,8 +1,8 @@
 use crate::commands::Runnable;
 use crate::device::{filesystem as fs, receive, Device};
 
-#[derive(clap::Parser)]
 /// List files in a category, or all files.
+#[derive(clap::Parser)]
 pub struct Args {
 	/// If category is not specified, only files in named categories are listed.
 	category: Option<fs::Category>,

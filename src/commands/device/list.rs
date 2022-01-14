@@ -1,8 +1,8 @@
 use crate::commands::Runnable;
 use crate::device;
 
-#[derive(clap::Parser)]
 /// Print device info.
+#[derive(clap::Parser)]
 pub struct Args {}
 
 impl Runnable for Args {

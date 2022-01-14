@@ -3,8 +3,8 @@
 use crate::commands::Runnable;
 use std::path::PathBuf;
 
-#[derive(clap::Parser)]
 /// Mount the device as a FUSE filesystem.
+#[derive(clap::Parser)]
 pub struct Args {
 	mount_point: PathBuf,
 }

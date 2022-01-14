@@ -1,8 +1,8 @@
 use crate::commands::Runnable;
 use crate::device::{filesystem as fs, send};
 
-#[derive(clap::Parser)]
 /// Print a file's metadata.
+#[derive(clap::Parser)]
 pub struct Args {
 	/// Remote file.
 	file: fs::QualFileName,

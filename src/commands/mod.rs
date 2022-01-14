@@ -33,8 +33,8 @@ impl Runnable for Subcommand {
 #[derive(Parser)]
 #[clap(about, version, author)]
 struct Args {
-	#[clap(long = "verbose", short, parse(from_occurrences))]
 	/// Increase verbosity.
+	#[clap(long = "verbose", short, parse(from_occurrences))]
 	verbosity: usize,
 	/// Specify the path to the device
 	#[cfg_attr(target_family = "unix", doc = "e.g., /dev/ttyACM0.")]

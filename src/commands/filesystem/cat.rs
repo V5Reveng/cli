@@ -3,10 +3,10 @@ use crate::device::filesystem as fs;
 use log::error;
 use std::io::stdout;
 
-#[derive(clap::Parser)]
 /// Output the contents of a file.
 ///
 /// To "pull" a file from the device, you can add ` > local.file` to the command line.
+#[derive(clap::Parser)]
 pub struct Args {
 	/// Remote file.
 	file: fs::QualFile,
