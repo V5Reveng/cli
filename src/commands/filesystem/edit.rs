@@ -67,15 +67,14 @@ impl Runnable for Args {
 			edited_file.seek(io::SeekFrom::Start(0)).expect("Rewinding edited file to beginning");
 			let edited_crc = crc32_from_file(&mut edited_file).expect("Calculating edited file CRC");
 			edited_file.seek(io::SeekFrom::Start(0)).expect("Rewinding edited file to beginning");
-			dev
-				.write_file_from_stream(
-					&mut edited_file,
-					&self.file,
-					edited_len.try_into().expect("Edited file is too large"),
-					edited_crc,
-					&dev_fs::WriteArgs { overwrite: true, ..Default::default() },
-				)
-				.expect("Writing edited file");
+			dev.write_file_from_stream(
+				&mut edited_file,
+				&self.file,
+				edited_len.try_into().expect("Edited file is too large"),
+				edited_crc,
+				&dev_fs::WriteArgs { overwrite: true, ..Default::default() },
+			)
+			.expect("Writing edited file");
 		}
 
 		0
