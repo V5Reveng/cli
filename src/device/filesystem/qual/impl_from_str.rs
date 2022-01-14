@@ -1,36 +1,6 @@
-use super::{Category, CategoryFromStrError, FileName, FileType, FixedStringFromStrError};
+use super::super::{Category, FileName, FileType};
+use super::{QualFile, QualFileFromStrError, QualFileName};
 
-/// A qualified file name, that is, one with a category.
-#[derive(Debug, Hash, PartialEq, Eq)]
-pub struct QualFileName {
-	pub category: Category,
-	pub name: FileName,
-}
-#[derive(Debug)]
-pub enum QualFileFromStrError {
-	Category(CategoryFromStrError),
-	FileName(FixedStringFromStrError),
-	FileType(FixedStringFromStrError),
-}
-impl std::fmt::Display for QualFileFromStrError {
-	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-		match self {
-			Self::Category(e) => {
-				formatter.write_str("invalid category: ")?;
-				std::fmt::Display::fmt(e, formatter)
-			}
-			Self::FileName(e) => {
-				formatter.write_str("invalid file name: ")?;
-				e.fmt(formatter)
-			}
-			Self::FileType(e) => {
-				formatter.write_str("invalid file type: ")?;
-				e.fmt(formatter)
-			}
-		}
-	}
-}
-impl std::error::Error for QualFileFromStrError {}
 impl std::str::FromStr for QualFileName {
 	type Err = QualFileFromStrError;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -47,18 +17,7 @@ impl std::str::FromStr for QualFileName {
 		}
 	}
 }
-impl std::fmt::Display for QualFileName {
-	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-		write!(formatter, "{}:{}", self.category, self.name)
-	}
-}
 
-/// A qualified file, that is, one with a category and type.
-#[derive(Debug, Hash)]
-pub struct QualFile {
-	pub common: QualFileName,
-	pub ty: FileType,
-}
 impl std::str::FromStr for QualFile {
 	type Err = QualFileFromStrError;
 	// by not implementing this in terms of QualFileName::from_str, we avoid the buffering and unbuffering through FileName instances, instead using &str until we actually need to write the data.
@@ -87,10 +46,5 @@ impl std::str::FromStr for QualFile {
 			},
 			ty: FileType::from_str(ret_ty).map_err(Self::Err::FileType)?,
 		})
-	}
-}
-impl std::fmt::Display for QualFile {
-	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-		write!(formatter, "{} (type: {})", self.common, self.ty)
 	}
 }
