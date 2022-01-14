@@ -22,7 +22,9 @@ serialport = "4.0.1"
 serde = { version = "1.0.133", features = ["derive"] }
 serde_ini = "0.2.0"
 
-[features]
+[target.'cfg(target_os = "linux")'.dependencies]
+fuse = { git = "https://github.com/zargony/fuse-rs", rev = "39fde4a5c47ce370d228ac190f950bd835db7f47" }
+libc = "0.2.112"
 
 [workspace]
 members = [".", "encde", "encde/derive"]

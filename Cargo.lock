@@ -225,6 +225,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a246d82be1c9d791c5dfde9a2bd045fc3cbba3fa2b11ad558f27d01712f00569"
 
 [[package]]
+name = "fuse"
+version = "0.4.0-dev"
+source = "git+https://github.com/zargony/fuse-rs?rev=39fde4a5c47ce370d228ac190f950bd835db7f47#39fde4a5c47ce370d228ac190f950bd835db7f47"
+dependencies = [
+ "fuse-abi",
+ "fuse-sys",
+ "libc",
+ "log",
+ "thread-scoped",
+]
+
+[[package]]
+name = "fuse-abi"
+version = "0.4.0-dev"
+source = "git+https://github.com/zargony/fuse-rs?rev=39fde4a5c47ce370d228ac190f950bd835db7f47#39fde4a5c47ce370d228ac190f950bd835db7f47"
+
+[[package]]
+name = "fuse-sys"
+version = "0.4.0-dev"
+source = "git+https://github.com/zargony/fuse-rs?rev=39fde4a5c47ce370d228ac190f950bd835db7f47#39fde4a5c47ce370d228ac190f950bd835db7f47"
+dependencies = [
+ "pkg-config",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -567,6 +592,8 @@ dependencies = [
  "clap",
  "clap-num",
  "encde",
+ "fuse",
+ "libc",
  "log",
  "phf",
  "png",
@@ -655,6 +682,12 @@ checksum = "0066c8d12af8b5acd21e00547c3797fde4e8677254a7ee429176ccebbe93dd80"
 dependencies = [
  "unicode-width",
 ]
+
+[[package]]
+name = "thread-scoped"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bcbb6aa301e5d3b0b5ef639c9a9c7e2f1c944f177b460c04dc24c69b1fa2bd99"
 
 [[package]]
 name = "time"
