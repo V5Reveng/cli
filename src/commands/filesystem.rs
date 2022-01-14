@@ -41,6 +41,7 @@ impl Runnable for Commands {
 			Commands::Edit(args) => args.run(dev),
 			Commands::Info(args) => args.run(dev),
 			Commands::Ls(args) => args.run(dev),
+			#[cfg(target_os = "linux")]
 			Commands::Mount(args) => args.run(dev),
 			Commands::Rm(args) => args.run(dev),
 			Commands::Sponge(args) => args.run(dev),
