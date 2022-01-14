@@ -178,4 +178,9 @@ impl Device {
 	pub fn stop_execution(&mut self) -> Result<()> {
 		self.ext_command_with_data::<_, ()>(0x18, &priv_send::ExecuteFile::stop())
 	}
+
+	#[cfg(target_os = "linux")]
+	pub fn into_fuse(self) -> crate::fuse::Server {
+		crate::fuse::Server::from_device(self)
+	}
 }

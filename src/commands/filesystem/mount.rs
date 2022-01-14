@@ -10,7 +10,9 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, _dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
-		todo!();
+	fn run(self, dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
+		let dev = crate::commands::unwrap_device_presence(dev);
+		fuse::mount(dev.into_fuse(), &self.mount_point, &[]).expect("Could not mount filesystem");
+		0
 	}
 }

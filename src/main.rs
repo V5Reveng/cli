@@ -5,6 +5,8 @@
 mod commands;
 mod crc;
 mod device;
+#[cfg(target_os = "linux")]
+mod fuse;
 mod logging;
 mod program;
 mod util;
