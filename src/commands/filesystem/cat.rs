@@ -13,7 +13,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
+	fn run(self, dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 		let contents = dev.read_file_to_stream(&mut stdout(), &self.file, &crate::device::filesystem::ReadArgs { ..Default::default() });
 		match contents {

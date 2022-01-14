@@ -2,8 +2,7 @@ mod commands;
 mod crc;
 mod device;
 mod logging;
-mod presence;
-mod temp_dir;
+mod util;
 
 fn main() {
 	logging::init();

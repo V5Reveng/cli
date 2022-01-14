@@ -28,7 +28,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
+	fn run(self, dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 		let mut data = Vec::default();
 		// we have to buffer this to have the size and the CRC

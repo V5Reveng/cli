@@ -1,7 +1,7 @@
 use crate::device::Device;
 use crate::device::UploadableInfo;
 use crate::logging;
-use crate::presence::Presence;
+use crate::util::presence::Presence;
 use clap::Parser;
 use std::path::PathBuf;
 

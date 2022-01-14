@@ -1,7 +1,7 @@
 use crate::commands::Runnable;
 use crate::crc::CrcComputable;
 use crate::device::filesystem as dev_fs;
-use crate::temp_dir::TempDir;
+use crate::util::temp_dir::TempDir;
 use log::{error, warn};
 use std::io::{self, Read, Seek};
 use std::{fs, process};
@@ -14,7 +14,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
+	fn run(self, dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 
 		// do this now so it fails before we do IO

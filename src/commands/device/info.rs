@@ -5,7 +5,7 @@ use crate::commands::Runnable;
 pub struct Args {}
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
+	fn run(self, dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = dev.expect_one("No uploadable device found", "Multiple uploadable devices found");
 		let dev_info = dev.device_info().unwrap();
 		let ext_dev_info = dev.extended_device_info().unwrap();
