@@ -13,10 +13,6 @@ pub mod receive;
 pub mod send;
 pub use discover::{UploadableInfo, UploadableType};
 
-const VEX_VENDOR_ID: u16 = 0x2888;
-const CONTROLLER_PRODUCT_ID: u16 = 0x0503;
-const BRAIN_PRODUCT_ID: u16 = 0x0501;
-
 const SERIAL_BAUD: u32 = 115200;
 
 pub struct Device {
