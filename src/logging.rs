@@ -51,6 +51,21 @@ pub fn init() {
 		Err(std::env::VarError::NotUnicode(_)) => panic!("REVENG_LOG_LEVEL environment variable is not valid Unicode"),
 		Err(_) => (),
 	}
+	std::panic::set_hook(Box::new(move |info: &std::panic::PanicInfo| {
+		use log::{debug, error};
+		let info = format!("{}", info);
+		// if possible, we want to convert from "panicked at 'text'" to just "text"
+		if let Some((message, location)) = info.rsplit_once(' ') {
+			debug!("panic occurred at {}", location);
+			if let Some(shorter_message) = message.strip_prefix("panicked at ").and_then(|x| x.strip_suffix(',')) {
+				error!("{}", shorter_message.trim_matches('\''))
+			} else {
+				error!("{}", message);
+			}
+		} else {
+			error!("{}", info);
+		}
+	}));
 }
 
 pub fn level() -> LevelFilter {
