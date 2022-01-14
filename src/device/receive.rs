@@ -1,4 +1,4 @@
-use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, PacketSize, TimeStamp};
+use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, TimeStamp};
 use super::helpers::{LongVersion, Product, ShortVersion, SystemID};
 use encde::Decode;
 
@@ -72,10 +72,3 @@ pub struct FileMetadataByIndex {
 
 #[derive(Decode)]
 pub struct NumFiles(pub i16);
-
-#[derive(Decode)]
-pub(super) struct StartFileTransfer {
-	pub max_packet_size: PacketSize,
-	pub file_size: FileSize,
-	pub crc: u32,
-}
