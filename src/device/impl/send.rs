@@ -29,6 +29,7 @@ pub struct DeleteFile {
 	options: u8,
 	pub name: FileName,
 }
+
 impl DeleteFile {
 	pub fn new(data: &QualFileName, include_linked: bool) -> Self {
 		Self {
@@ -45,6 +46,7 @@ pub struct FileTransferSetLink {
 	options: u8,
 	pub linked_name: FileName,
 }
+
 impl FileTransferSetLink {
 	pub fn new(linked_file: &QualFileName) -> Self {
 		Self {

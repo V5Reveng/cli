@@ -7,6 +7,7 @@ pub struct FileMetadataByName {
 	options: u8,
 	pub name: FileName,
 }
+
 impl FileMetadataByName {
 	pub fn new(data: &QualFileName) -> Self {
 		Self {
@@ -22,6 +23,7 @@ pub struct FileMetadataByIndex {
 	pub index: FileIndex,
 	options: u8,
 }
+
 impl FileMetadataByIndex {
 	pub fn new(index: u8) -> Self {
 		Self { index, options: 0 }

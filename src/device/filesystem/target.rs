@@ -7,6 +7,7 @@ pub enum Target {
 	Flash = 1,
 	Screen = 2,
 }
+
 impl Default for Target {
 	fn default() -> Self {
 		Self::Flash

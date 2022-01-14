@@ -14,6 +14,7 @@ impl From<Box<dyn SerialPort>> for CRCSerialPort {
 		Self { underlying, tx_crc: 0, rx_crc: 0 }
 	}
 }
+
 impl CRCSerialPort {
 	pub fn port(&self) -> &dyn SerialPort {
 		&*self.underlying

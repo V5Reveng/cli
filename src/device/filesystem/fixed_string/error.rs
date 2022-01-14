@@ -5,6 +5,7 @@ pub enum FixedStringFromStrError {
 	TooLong,
 	InvalidUnicode,
 }
+
 impl Display for FixedStringFromStrError {
 	fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
 		let s = match self {
@@ -14,4 +15,5 @@ impl Display for FixedStringFromStrError {
 		formatter.write_str(s)
 	}
 }
+
 impl std::error::Error for FixedStringFromStrError {}

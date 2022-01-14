@@ -9,11 +9,13 @@ pub struct ShortVersion {
 	patch: u8,
 	build_major: u8,
 }
+
 impl ShortVersion {
 	pub fn new(major: u8, minor: u8, patch: u8, build_major: u8) -> Self {
 		Self { major, minor, patch, build_major }
 	}
 }
+
 impl Display for ShortVersion {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
 		write!(formatter, "{}.{}.{}-{}", self.major, self.minor, self.patch, self.build_major)
@@ -25,6 +27,7 @@ pub struct LongVersion {
 	common: ShortVersion,
 	build_minor: u8,
 }
+
 impl LongVersion {
 	pub fn new(major: u8, minor: u8, patch: u8, build_major: u8, build_minor: u8) -> Self {
 		Self {
@@ -33,6 +36,7 @@ impl LongVersion {
 		}
 	}
 }
+
 impl Display for LongVersion {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
 		write!(formatter, "{}.{}", self.common, self.build_minor)

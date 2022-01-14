@@ -16,12 +16,14 @@ impl<const N: usize> FromStr for FixedString<N> {
 		Ok(ret)
 	}
 }
+
 impl<const N: usize> TryFrom<&str> for FixedString<N> {
 	type Error = <Self as FromStr>::Err;
 	fn try_from(s: &str) -> Result<Self, Self::Error> {
 		Self::from_str(s)
 	}
 }
+
 impl<const N: usize> TryFrom<&OsStr> for FixedString<N> {
 	type Error = Error;
 	fn try_from(s: &OsStr) -> Result<Self, Self::Error> {

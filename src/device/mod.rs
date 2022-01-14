@@ -17,6 +17,7 @@ pub struct Device {
 	ty: UploadableType,
 	port: crate::crc::CRCSerialPort,
 }
+
 impl Debug for Device {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
 		write!(formatter, "Device of type {} at {}", self.ty, self.port.port().name().unwrap_or_else(|| "(unknown)".to_owned()))

@@ -4,6 +4,7 @@ use std::fmt::{self, Display, Formatter};
 pub enum CategoryFromStrError {
 	UnknownCategory,
 }
+
 impl Display for CategoryFromStrError {
 	fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
 		let s = match self {
@@ -12,4 +13,5 @@ impl Display for CategoryFromStrError {
 		formatter.write_str(s)
 	}
 }
+
 impl std::error::Error for CategoryFromStrError {}

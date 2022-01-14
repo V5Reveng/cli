@@ -30,12 +30,17 @@ impl Default for TransferCompleteAction {
 		Self::NoRun
 	}
 }
+
 /// The V5 is a 32-bit platform.
 pub type Address = u32;
+
 pub type FileSize = u32;
 
 pub type FileIndex = u8;
+
 pub type PacketSize = u16;
+
 pub type FileType = FixedString<4>;
+
 // This type is the same size as String so you might as well store it by value!
 pub type FileName = FixedString<24>;

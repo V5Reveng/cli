@@ -9,17 +9,20 @@ impl Drop for TempDir {
 		remove_dir_all(self).expect("Cleaning up temporary directory");
 	}
 }
+
 impl std::ops::Deref for TempDir {
 	type Target = Path;
 	fn deref(&self) -> &Self::Target {
 		&self.0
 	}
 }
+
 impl AsRef<Path> for TempDir {
 	fn as_ref(&self) -> &Path {
 		&self.0
 	}
 }
+
 impl TempDir {
 	pub fn new() -> std::io::Result<Self> {
 		const NUM_RAND_CHARS: usize = 24;

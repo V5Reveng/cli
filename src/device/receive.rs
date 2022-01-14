@@ -46,6 +46,7 @@ pub struct FileMetadataByName {
 	pub version: ShortVersion,
 	linked_name: FileName,
 }
+
 impl FileMetadataByName {
 	pub fn is_link(&self) -> bool {
 		self.linked_category != Category::None
@@ -58,6 +59,7 @@ impl FileMetadataByName {
 		}
 	}
 }
+
 #[derive(Decode, Debug)]
 pub struct FileMetadataByIndex {
 	pub idx: FileIndex,

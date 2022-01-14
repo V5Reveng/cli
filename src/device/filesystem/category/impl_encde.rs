@@ -8,6 +8,7 @@ impl Encode for Category {
 		value.encode(writer)
 	}
 }
+
 impl Decode for Category {
 	fn decode(reader: &mut dyn Read) -> encde::Result<Self> {
 		let value = u8::decode(reader)?;

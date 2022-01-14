@@ -13,6 +13,7 @@ impl From<u8> for Category {
 		}
 	}
 }
+
 impl From<Category> for u8 {
 	fn from(value: Category) -> Self {
 		match value {

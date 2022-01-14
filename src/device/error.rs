@@ -29,6 +29,7 @@ impl From<std::io::Error> for DeviceError {
 		Self::IO(err)
 	}
 }
+
 impl From<serialport::Error> for DeviceError {
 	fn from(err: serialport::Error) -> Self {
 		use serialport::ErrorKind::*;
@@ -40,11 +41,13 @@ impl From<serialport::Error> for DeviceError {
 		}
 	}
 }
+
 impl From<encde::Error> for DeviceError {
 	fn from(err: encde::Error) -> Self {
 		Self::Encde(err)
 	}
 }
+
 impl From<ProtocolError> for DeviceError {
 	fn from(err: ProtocolError) -> Self {
 		Self::Protocol(err)

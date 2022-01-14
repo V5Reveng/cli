@@ -7,6 +7,7 @@ static CRATE_PREFIX: &str = "reveng_cli::";
 /// The absolute most simple logger
 /// Logs to stderr and has no local level
 pub struct SimpleLogger(());
+
 impl SimpleLogger {
 	fn actually_enabled(level: Level, module_path: Option<&str>) -> bool {
 		let max_level = module_path.and_then(|module_path| LOCAL_LEVELS.read().unwrap().get(module_path).copied()).unwrap_or_else(super::level);
@@ -16,6 +17,7 @@ impl SimpleLogger {
 		Self(())
 	}
 }
+
 impl Log for SimpleLogger {
 	fn enabled(&self, metadata: &Metadata<'_>) -> bool {
 		metadata.level() <= super::level()

@@ -12,6 +12,7 @@ static LEVELS: phf::Map<&'static str, LevelFilter> = phf_map! {
 	"error" => LevelFilter::Error,
 	"off" => LevelFilter::Off,
 };
+
 static INVALID_LEVEL: &str = "Invalid log level provided via REVENG_LOG_LEVEL; valid levels are trace, debug, info, warn, error, off";
 
 /// On error, returns a reason along with the invalid string

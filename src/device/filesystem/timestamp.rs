@@ -7,6 +7,7 @@ use std::num::TryFromIntError;
 #[derive(Debug, Clone, Copy)]
 #[repr(transparent)]
 pub struct TimeStamp(DateTime<Local>);
+
 impl TimeStamp {
 	pub fn now() -> Self {
 		Self(Local::now())
@@ -21,27 +22,32 @@ impl TimeStamp {
 		Some(Self(base_time + Duration::seconds(repr as i64)))
 	}
 }
+
 impl Display for TimeStamp {
 	fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
 		self.0.fmt(formatter)
 	}
 }
+
 impl Encode for TimeStamp {
 	fn encode(&self, writer: &mut dyn Write) -> encde::Result<()> {
 		self.as_repr().map_err(|_| EError::Custom("Could not extract TimeStamp from its representation"))?.encode(writer)
 	}
 }
+
 impl Decode for TimeStamp {
 	fn decode(reader: &mut dyn Read) -> encde::Result<Self> {
 		let repr = Decode::decode(reader)?;
 		Self::from_repr(repr).ok_or(EError::Custom("Could not convert TimeStamp to its representation"))
 	}
 }
+
 impl From<DateTime<Local>> for TimeStamp {
 	fn from(dt: DateTime<Local>) -> Self {
 		Self(dt)
 	}
 }
+
 impl Default for TimeStamp {
 	fn default() -> TimeStamp {
 		Self::now()

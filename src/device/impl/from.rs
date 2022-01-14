@@ -12,6 +12,7 @@ impl<'a> TryFrom<&'a Path> for Device {
 		UploadableInfo::try_from(path).map(Device::from)
 	}
 }
+
 impl From<UploadableInfo> for Device {
 	fn from(info: UploadableInfo) -> Self {
 		use serialport::*;
