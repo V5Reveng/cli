@@ -9,7 +9,7 @@ pub enum Function {
 	Download = 2,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Eq, Clone, Copy)]
 pub enum Category {
 	None,
 	User,
@@ -78,8 +78,12 @@ impl std::fmt::Display for Category {
 		formatter.write_str(name)
 	}
 }
+#[derive(Debug)]
+pub enum CategoryFromStrError {
+	UnknownCategory,
+}
 impl std::str::FromStr for Category {
-	type Err = &'static str;
+	type Err = CategoryFromStrError;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		match s {
 			"default" => Ok(Self::default()),
@@ -90,9 +94,28 @@ impl std::str::FromStr for Category {
 			"mw" => Ok(Self::Mw),
 			s => match u8::from_str(s) {
 				Ok(x) => Ok(Self::Unnamed(x)),
-				Err(_) => Err("Unknown file category. Possible categories are default (user), user, system, rms, pros, mw, or an unnamed category as a number."),
+				Err(_) => Err(Self::Err::UnknownCategory),
 			},
 		}
+	}
+}
+impl std::fmt::Display for CategoryFromStrError {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let s = match self {
+			Self::UnknownCategory => "unknown category",
+		};
+		formatter.write_str(s)
+	}
+}
+impl std::error::Error for CategoryFromStrError {}
+impl std::hash::Hash for Category {
+	fn hash<H: std::hash::Hasher>(&self, hasher: &mut H) {
+		hasher.write_u8(u8::from(*self))
+	}
+}
+impl PartialEq for Category {
+	fn eq(&self, other: &Self) -> bool {
+		u8::from(*self) == u8::from(*other)
 	}
 }
 
@@ -180,6 +203,22 @@ pub type FileSize = u32;
 pub type FileIndex = u8;
 pub type PacketSize = u16;
 
+#[derive(Debug)]
+pub enum FixedStringFromStrError {
+	TooLong,
+	InvalidUnicode,
+}
+impl std::fmt::Display for FixedStringFromStrError {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let s = match self {
+			Self::TooLong => "string is too long",
+			Self::InvalidUnicode => "string is invalid Unicode",
+		};
+		formatter.write_str(s)
+	}
+}
+impl std::error::Error for FixedStringFromStrError {}
+
 #[derive(Encode, Decode, Clone, Copy, Eq)]
 #[repr(transparent)]
 pub struct FixedString<const N: usize>([u8; N]);
@@ -189,10 +228,10 @@ impl<const N: usize> Default for FixedString<N> {
 	}
 }
 impl<const N: usize> std::str::FromStr for FixedString<N> {
-	type Err = &'static str;
+	type Err = FixedStringFromStrError;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		if s.len() > N {
-			return Err("String is too long");
+			return Err(Self::Err::TooLong);
 		}
 		let mut ret: Self = Self::default();
 		for (idx, byte) in s.bytes().chain(std::iter::repeat(0)).take(N).enumerate() {
@@ -205,6 +244,12 @@ impl<const N: usize> std::convert::TryFrom<&str> for FixedString<N> {
 	type Error = <Self as std::str::FromStr>::Err;
 	fn try_from(s: &str) -> Result<Self, Self::Error> {
 		<Self as std::str::FromStr>::from_str(s)
+	}
+}
+impl<const N: usize> std::convert::TryFrom<&std::ffi::OsStr> for FixedString<N> {
+	type Error = FixedStringFromStrError;
+	fn try_from(s: &std::ffi::OsStr) -> Result<Self, Self::Error> {
+		<Self as std::str::FromStr>::from_str(s.to_str().ok_or(Self::Error::InvalidUnicode)?)
 	}
 }
 impl<const N: usize> FixedString<N> {
@@ -245,29 +290,64 @@ impl<const N: usize> PartialEq for FixedString<N> {
 		true
 	}
 }
+impl<const N: usize> std::hash::Hash for FixedString<N> {
+	fn hash<H: std::hash::Hasher>(&self, hasher: &mut H) {
+		for c in self.0 {
+			if c == 0 {
+				break;
+			}
+			hasher.write_u8(c);
+		}
+	}
+}
 
 pub type FileType = FixedString<4>;
 // This type is the same size as String so you might as well store it by value!
 pub type FileName = FixedString<24>;
 
 /// A qualified file name, that is, one with a category.
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct QualFileName {
 	pub category: Category,
 	pub name: FileName,
 }
+#[derive(Debug)]
+pub enum QualFileFromStrError {
+	Category(CategoryFromStrError),
+	FileName(FixedStringFromStrError),
+	FileType(FixedStringFromStrError),
+}
+impl std::fmt::Display for QualFileFromStrError {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		match self {
+			Self::Category(e) => {
+				formatter.write_str("invalid category: ")?;
+				std::fmt::Display::fmt(e, formatter)
+			}
+			Self::FileName(e) => {
+				formatter.write_str("invalid file name: ")?;
+				e.fmt(formatter)
+			}
+			Self::FileType(e) => {
+				formatter.write_str("invalid file type: ")?;
+				e.fmt(formatter)
+			}
+		}
+	}
+}
+impl std::error::Error for QualFileFromStrError {}
 impl std::str::FromStr for QualFileName {
-	type Err = &'static str;
+	type Err = QualFileFromStrError;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		if let Some((category, name)) = s.split_once(':') {
 			Ok(Self {
-				category: Category::from_str(category)?,
-				name: FileName::from_str(name)?,
+				category: Category::from_str(category).map_err(|e| Self::Err::Category(e))?,
+				name: FileName::from_str(name).map_err(|e| Self::Err::FileName(e))?,
 			})
 		} else {
 			Ok(Self {
 				category: Category::default(),
-				name: FileName::from_str(s)?,
+				name: FileName::from_str(s).map_err(|e| Self::Err::FileName(e))?,
 			})
 		}
 	}
@@ -279,13 +359,13 @@ impl std::fmt::Display for QualFileName {
 }
 
 /// A qualified file, that is, one with a category and type.
-#[derive(Debug)]
+#[derive(Debug, Hash)]
 pub struct QualFile {
 	pub common: QualFileName,
 	pub ty: FileType,
 }
 impl std::str::FromStr for QualFile {
-	type Err = &'static str;
+	type Err = QualFileFromStrError;
 	// by not implementing this in terms of QualFileName::from_str, we avoid the buffering and unbuffering through FileName instances, instead using &str until we actually need to write the data.
 	// &str is not actually much smaller than a FileName (16 bytes vs 24), but it allows for the easy and lightweight creation and manipulation of substrings.
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -296,7 +376,7 @@ impl std::str::FromStr for QualFile {
 		// if there is a category, the ret_name will be the part after the colon
 		// e.g., user:slot_1.ini
 		if let Some((category, other)) = s.split_once(':') {
-			ret_category = Category::from_str(category)?;
+			ret_category = Category::from_str(category).map_err(Self::Err::Category)?;
 			ret_name = other;
 		}
 		// otherwise, the ret_name will be the whole string
@@ -308,9 +388,9 @@ impl std::str::FromStr for QualFile {
 		Ok(Self {
 			common: QualFileName {
 				category: ret_category,
-				name: FileName::from_str(ret_name)?,
+				name: FileName::from_str(ret_name).map_err(Self::Err::FileName)?,
 			},
-			ty: FileType::from_str(ret_ty)?,
+			ty: FileType::from_str(ret_ty).map_err(Self::Err::FileType)?,
 		})
 	}
 }
