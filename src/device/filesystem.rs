@@ -341,13 +341,13 @@ impl std::str::FromStr for QualFileName {
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		if let Some((category, name)) = s.split_once(':') {
 			Ok(Self {
-				category: Category::from_str(category).map_err(|e| Self::Err::Category(e))?,
-				name: FileName::from_str(name).map_err(|e| Self::Err::FileName(e))?,
+				category: Category::from_str(category).map_err(Self::Err::Category)?,
+				name: FileName::from_str(name).map_err(Self::Err::FileName)?,
 			})
 		} else {
 			Ok(Self {
 				category: Category::default(),
-				name: FileName::from_str(s).map_err(|e| Self::Err::FileName(e))?,
+				name: FileName::from_str(s).map_err(Self::Err::FileName)?,
 			})
 		}
 	}
