@@ -38,7 +38,7 @@ impl TryFrom<&Path> for UploadableInfo {
 		if !path.exists() {
 			return Err(FPError::Nonexistent);
 		}
-		let path = path.to_str().ok_or(FPError::PathNotUTF8)?;
+		let path = path.to_str().ok_or(FPError::PathNotUtf8)?;
 		Self::get_all().map_err(FPError::from)?.into_iter().find(|port| port.name == path).ok_or(FPError::NotValid)
 	}
 }

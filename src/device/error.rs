@@ -21,7 +21,7 @@ pub enum ProtocolError {
 
 #[derive(Debug)]
 pub enum DeviceError {
-	IO(std::io::Error),
+	Io(std::io::Error),
 	Serial(SerialError),
 	Encde(encde::Error),
 	Protocol(ProtocolError),
@@ -29,7 +29,7 @@ pub enum DeviceError {
 
 impl From<std::io::Error> for DeviceError {
 	fn from(err: std::io::Error) -> Self {
-		Self::IO(err)
+		Self::Io(err)
 	}
 }
 
@@ -37,7 +37,7 @@ impl From<serialport::Error> for DeviceError {
 	fn from(err: serialport::Error) -> Self {
 		use serialport::ErrorKind::*;
 		match err.kind {
-			Io(kind) => Self::IO(kind.into()),
+			Io(kind) => Self::Io(kind.into()),
 			InvalidInput => Self::Serial(SerialError::InvalidInput),
 			NoDevice => Self::Serial(SerialError::NoDevice),
 			Unknown => Self::Serial(SerialError::Unknown),

@@ -17,7 +17,7 @@ pub use response_byte::ResponseByte;
 pub struct Device {
 	ty: UploadableType,
 	/// The serial port used to communicate with the device.
-	port: crate::crc::CRCSerialPort,
+	port: crate::crc::CrcSerialPort,
 }
 
 impl Debug for Device {

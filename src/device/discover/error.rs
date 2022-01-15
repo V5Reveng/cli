@@ -2,7 +2,7 @@ use serialport::Error;
 
 #[derive(Debug)]
 pub enum UploadableInfoFromPathError {
-	PathNotUTF8,
+	PathNotUtf8,
 	Nonexistent,
 	SerialPortError(Error),
 	/// The path, in some way, does not refer to a valid uploadable device. Among others:

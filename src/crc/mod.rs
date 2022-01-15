@@ -11,4 +11,4 @@ pub mod for_u16;
 pub mod for_u32;
 pub mod serial_port;
 
-pub use serial_port::CRCSerialPort;
+pub use serial_port::CrcSerialPort;

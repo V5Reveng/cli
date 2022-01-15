@@ -4,19 +4,19 @@ use serialport::SerialPort;
 use std::io::{Read, Result, Write};
 
 /// A serial port that passively calculates the 16-bit CRC of the data that passes through it in both directions.
-pub struct CRCSerialPort {
+pub struct CrcSerialPort {
 	underlying: Box<dyn SerialPort>,
 	tx_crc: u16,
 	rx_crc: u16,
 }
 
-impl From<Box<dyn SerialPort>> for CRCSerialPort {
+impl From<Box<dyn SerialPort>> for CrcSerialPort {
 	fn from(underlying: Box<dyn SerialPort>) -> Self {
 		Self { underlying, tx_crc: 0, rx_crc: 0 }
 	}
 }
 
-impl CRCSerialPort {
+impl CrcSerialPort {
 	pub fn port(&self) -> &dyn SerialPort {
 		&*self.underlying
 	}
@@ -50,7 +50,7 @@ impl CRCSerialPort {
 }
 
 /// Reading reads from the underlying port, calculating the CRC before returning as usual.
-impl Read for CRCSerialPort {
+impl Read for CrcSerialPort {
 	fn read(&mut self, output: &mut [u8]) -> Result<usize> {
 		let ret = self.underlying.read(output)?;
 		trace!("updating rx crc with {} bytes: {:?}", ret, output);
@@ -60,7 +60,7 @@ impl Read for CRCSerialPort {
 }
 
 /// Writing writes to the underlying port, calculating the CRC of the data that was written before returning as usual.
-impl Write for CRCSerialPort {
+impl Write for CrcSerialPort {
 	fn write(&mut self, slice: &[u8]) -> Result<usize> {
 		trace!("updating tx crc with up to {} bytes: {:?}", slice.len(), slice);
 		let ret = self.underlying.write(slice)?;

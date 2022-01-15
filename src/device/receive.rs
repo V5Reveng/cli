@@ -1,7 +1,7 @@
 //! Payloads to be received with commands. These are public to the crate, as opposed to `r#impl::receive` which is private to the `Device`.
 
 use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, TimeStamp};
-use super::helpers::{LongVersion, Product, ShortVersion, SystemID};
+use super::helpers::{LongVersion, Product, ShortVersion, SystemId};
 use encde::Decode;
 
 #[derive(Decode)]
@@ -21,7 +21,7 @@ pub struct ExtendedDeviceInfo {
 	/// Meaning unknown
 	pub touch_version: u8,
 	#[encde(pad_after = 12)]
-	pub system_id: SystemID,
+	pub system_id: SystemId,
 }
 
 #[derive(Decode)]

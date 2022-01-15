@@ -36,4 +36,4 @@ impl Display for Product {
 	}
 }
 
-pub type SystemID = u32;
+pub type SystemId = u32;
