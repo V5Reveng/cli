@@ -23,7 +23,7 @@ impl<T> From<Option<T>> for Presence<T> {
 	}
 }
 
-enum NotOne<T> {
+pub enum NotOne<T> {
 	None,
 	Many(Vec<T>),
 }
