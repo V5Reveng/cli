@@ -33,6 +33,7 @@ impl Default for TransferCompleteAction {
 
 /// The V5 is a 32-bit platform.
 pub type Address = u32;
+pub const DEFAULT_ADDRESS: Address = 0x07_80_00_00;
 
 pub type FileSize = u32;
 

@@ -100,7 +100,7 @@ impl Device {
 	pub fn write_file_from_stream(&mut self, stream: &mut dyn std::io::Read, file: &filesystem::QualFile, size: filesystem::FileSize, crc: u32, args: &filesystem::WriteArgs) -> Result<()> {
 		let address = match args.address {
 			Some(addr) => addr,
-			None => self.get_file_metadata_by_name(&send::FileMetadataByName::new(&file.common))?.map(|x| x.address).unwrap_or(0x0780_0000),
+			None => self.get_file_metadata_by_name(&send::FileMetadataByName::new(&file.common))?.map(|x| x.address).unwrap_or(filesystem::DEFAULT_ADDRESS),
 		};
 		let transfer_info = self.start_file_transfer(&priv_send::StartFileTransfer {
 			function: filesystem::Function::Upload,
