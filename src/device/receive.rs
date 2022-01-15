@@ -53,7 +53,7 @@ pub struct FileMetadataByName {
 
 impl FileMetadataByName {
 	pub fn is_link(&self) -> bool {
-		self.linked_category != Category::None
+		!self.linked_category.is_none()
 	}
 	pub fn get_link(&self) -> Option<(Category, &FileName)> {
 		if self.is_link() {

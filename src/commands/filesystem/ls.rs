@@ -43,8 +43,7 @@ fn list_in_category(dev: &mut Device, category: fs::Category) {
 
 /// List the files in all *named* categories.
 fn list_all_categories(dev: &mut Device) {
-	use fs::Category::*;
-	for category in [User, System, Pros, Rms, Mw] {
+	for &category in fs::Category::named() {
 		let files = dev.list_all_files(category).unwrap();
 		println!("Category: {}", category);
 		print_file_list(&files);

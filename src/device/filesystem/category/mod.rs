@@ -1,10 +1,8 @@
+use encde::{Decode, Encode};
+
 pub mod error;
 pub mod impl_display;
-pub mod impl_encde;
-pub mod impl_eq;
 pub mod impl_from_str;
-pub mod impl_hash;
-pub mod impl_u8_conv;
 
 pub use error::CategoryFromStrError;
 
@@ -12,20 +10,36 @@ pub use error::CategoryFromStrError;
 ///
 /// This is a primitive way to create subdirectories on the device's filesystem.
 /// Each category acts as one subdirectory of the root directory.
-#[derive(Debug, Eq, Clone, Copy)]
-pub enum Category {
-	/// Only received, never sent.
-	None,
-	User,
-	System,
-	Rms,
-	Pros,
-	Mw,
-	Unnamed(u8),
+#[derive(Encode, Decode, Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[repr(transparent)]
+pub struct Category(pub u8);
+
+impl Category {
+	pub const NONE: Category = Category(0);
+	pub const USER: Category = Category(1);
+	pub const SYSTEM: Category = Category(15);
+	pub const RMS: Category = Category(16);
+	pub const PROS: Category = Category(24);
+	pub const MW: Category = Category(32);
+
+	pub const MIN: u8 = u8::MIN;
+	pub const MAX: u8 = u8::MAX;
+
+	pub const fn named() -> &'static [Self] {
+		&[Self::USER, Self::SYSTEM, Self::RMS, Self::PROS, Self::MW]
+	}
+
+	pub fn is_none(&self) -> bool {
+		*self == Self::NONE
+	}
+
+	pub fn into_inner(self) -> u8 {
+		self.0
+	}
 }
 
 impl Default for Category {
 	fn default() -> Self {
-		Self::User
+		Self::USER
 	}
 }
