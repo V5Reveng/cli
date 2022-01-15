@@ -1,3 +1,5 @@
+//! Fixed-size strings stored inline.
+
 use encde::{Decode, Encode};
 
 pub mod error;

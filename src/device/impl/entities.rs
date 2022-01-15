@@ -1,3 +1,5 @@
+//! Entities to be used in the transmission and reception.
+
 use crate::device::r#impl::CommandId;
 use crate::device::{Device, DeviceError, ProtocolError, ResponseByte, Result};
 use encde::util::{decode_from_entire_slice, encode_to_vec};
@@ -8,12 +10,14 @@ use std::io::Read;
 impl Device {
 	pub const EXT_COMMAND: CommandId = 0x56;
 
+	/// A fixed byte-string used to signal that we would like to send a command.
 	pub fn tx_command_header(&mut self) -> Result<()> {
 		debug!("tx command header");
 		const HEADER: [u8; 4] = [0xc9, 0x36, 0xb8, 0x47];
 		self.tx_raw_data(&HEADER)?;
 		Ok(())
 	}
+	/// A fixed byte-string used to ensure that we didn't partially receive the previous command.
 	pub fn rx_response_header(&mut self) -> Result<()> {
 		debug!("rx response header");
 		let buf: [u8; 2] = self.rx_raw_data()?;
@@ -28,6 +32,7 @@ impl Device {
 			Ok(())
 		}
 	}
+	/// `rx_expect` with a more specific error message.
 	pub fn rx_echoed_command(&mut self, expected: CommandId) -> Result<()> {
 		debug!("rx echoed command {:02x}", expected);
 		let echoed_command: u8 = self.rx()?;
@@ -41,6 +46,7 @@ impl Device {
 			Ok(())
 		}
 	}
+	/// Always a single byte.
 	pub fn rx_simple_payload_length(&mut self) -> Result<usize> {
 		debug!("rx simple payload length");
 		Ok(self.rx::<u8>()? as usize)
@@ -51,6 +57,7 @@ impl Device {
 		self.port.read_exact(payload.as_mut_slice())?;
 		Ok(payload)
 	}
+	/// The simple payload length followed by a payload of that length.
 	pub fn rx_simple_raw_payload(&mut self) -> Result<Vec<u8>> {
 		debug!("rx simple raw payload");
 		let payload_length = self.rx_simple_payload_length()?;
@@ -59,11 +66,13 @@ impl Device {
 	pub fn decode_from_data<T: Decode>(data: &[u8]) -> Result<T> {
 		Ok(decode_from_entire_slice(data)?)
 	}
+	/// A simple raw payload that is then `Decode`d into an entity.
 	pub fn rx_simple_payload<T: Decode>(&mut self) -> Result<T> {
 		debug!("rx simple payload");
 		let raw = self.rx_simple_raw_payload()?;
 		Self::decode_from_data(&raw)
 	}
+	/// Has a maximum value of `u16::MAX` due to the encoding.
 	pub fn tx_vex_varint(&mut self, length: usize) -> Result<()> {
 		debug!("tx vex variable-length int: {}", length);
 		match length {
@@ -77,6 +86,7 @@ impl Device {
 			})),
 		}
 	}
+	/// See `tx_vex_varint` for comments.
 	pub fn rx_vex_varint(&mut self) -> Result<usize> {
 		let mut ret = self.rx::<u8>()? as usize;
 		if ret & 0x80 == 0x80 {
@@ -87,11 +97,13 @@ impl Device {
 		debug!("rx vex variable-length int: {}", ret);
 		Ok(ret)
 	}
+	/// `rx_vex_varint` with a log message.
 	pub fn rx_ext_payload_length(&mut self) -> Result<usize> {
 		let ret = self.rx_vex_varint()?;
 		debug!("rx extended payload length");
 		Ok(ret)
 	}
+	/// Receive an entity and assert that its value matches an expected value.
 	pub fn rx_expect<T: Decode + Encode + PartialEq + std::fmt::Debug>(&mut self, entity: &'static str, expected: &T) -> Result<()> {
 		let received = self.rx::<T>()?;
 		if &received != expected {
@@ -105,6 +117,7 @@ impl Device {
 			Ok(())
 		}
 	}
+	/// `rx` with a log message.
 	pub fn rx_response_byte(&mut self) -> Result<ResponseByte> {
 		debug!("rx response byte");
 		self.rx()

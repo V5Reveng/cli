@@ -2,8 +2,11 @@ use rand::distributions::{Distribution, Uniform};
 use std::fs::{create_dir, remove_dir_all};
 use std::path::{Path, PathBuf};
 
+/// An exclusive temporary directory unique to this instance.
 #[repr(transparent)]
 pub struct TempDir(PathBuf);
+
+/// The directory is deleted when dropped.
 impl Drop for TempDir {
 	fn drop(&mut self) {
 		remove_dir_all(self).expect("Cleaning up temporary directory");

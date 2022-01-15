@@ -1,13 +1,17 @@
+//! This module can be used to get the list of uploadable V5 devices. (Uploadable refers to devices to which a program can be uploaded.)
+
 use super::classification::{classify, Classification};
 use super::usb_port::{get_usb_devices, UsbPort};
 use super::{UploadableInfoFromPathError as FPError, UploadableType};
 use std::path::Path;
 
 pub struct UploadableInfo {
+	/// On platforms that use paths to represent serial devices (Windows, Unix, more?), this is that path.
 	pub name: String,
 	pub device_type: UploadableType,
 }
 
+/// The device can possible be converted from a USB port, as long as the USB port has an uploadable device connected.
 impl TryFrom<UsbPort> for UploadableInfo {
 	/// This is a bit ugly, but we can just pass the (non-uploadable) device type as the error
 	type Error = Classification;
@@ -26,6 +30,7 @@ impl TryFrom<UsbPort> for UploadableInfo {
 	}
 }
 
+/// You can get UploadableInfo for a Path, but it's not very elegant or performant.
 impl TryFrom<&Path> for UploadableInfo {
 	type Error = FPError;
 	fn try_from(path: &Path) -> Result<Self, Self::Error> {

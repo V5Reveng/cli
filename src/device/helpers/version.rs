@@ -1,3 +1,5 @@
+//! Read about SemVer for more information about the fields.
+
 use encde::{Decode, Encode};
 use std::cmp::{Ordering, PartialEq, PartialOrd};
 use std::fmt::{self, Debug, Display, Formatter};

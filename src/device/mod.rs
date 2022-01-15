@@ -4,6 +4,7 @@ pub mod discover;
 pub mod error;
 pub mod filesystem;
 mod helpers;
+// Maybe you're looking for this? All the actual code is in here.
 mod r#impl;
 pub mod receive;
 pub mod response_byte;
@@ -15,6 +16,7 @@ pub use response_byte::ResponseByte;
 
 pub struct Device {
 	ty: UploadableType,
+	/// The serial port used to communicate with the device.
 	port: crate::crc::CRCSerialPort,
 }
 

@@ -1,3 +1,5 @@
+//! The public interface to the Device.
+
 use super::send as priv_send;
 use super::CommandId;
 use crate::device::{filesystem, helpers, receive, send};
@@ -5,7 +7,6 @@ use crate::device::{Device, DeviceError, ProtocolError, ResponseByte, Result};
 use log::{debug, warn};
 
 impl Device {
-	/// Get the basic device information: version and product.
 	pub fn device_info(&mut self) -> Result<receive::DeviceInfo> {
 		debug!("sending device info command");
 		self.simple_command_no_data(0xa4)
@@ -19,7 +20,6 @@ impl Device {
 		};
 		Ok(device_info.version >= min_version)
 	}
-	/// Get the extended device information: system and CPU versions, touch version, and system ID.
 	pub fn extended_device_info(&mut self) -> Result<receive::ExtendedDeviceInfo> {
 		debug!("sending extended device info command");
 		const COMMAND_ID: CommandId = 0x22;
@@ -30,6 +30,7 @@ impl Device {
 		}
 	}
 
+	/// `Ok(None)` is returned if the file does not exist.
 	pub fn get_file_metadata_by_name(&mut self, args: &send::FileMetadataByName) -> Result<Option<receive::FileMetadataByName>> {
 		debug!("sending get-file-metadata-by-name command");
 		let ret = self.ext_command_with_data::<_, receive::FileMetadataByName>(0x19, args);
@@ -39,6 +40,10 @@ impl Device {
 			Err(err) => Err(err),
 		}
 	}
+	/// `Ok(None)` is returned if the file does not exist.
+	///
+	/// This is mostly used to either get the name of a file by its index, or to list the contents of a category.
+	/// The latter can also be done with `list_all_files`.
 	pub fn get_file_metadata_by_index(&mut self, index: filesystem::FileIndex) -> Result<Option<receive::FileMetadataByIndex>> {
 		let ret = self.ext_command_with_data::<_, receive::FileMetadataByIndex>(0x17, &send::FileMetadataByIndex::new(index));
 		match ret {
@@ -97,6 +102,7 @@ impl Device {
 		}
 	}
 
+	/// Write to the device from the specified stream. You will need to also provide the size of the file and the CRC beforehand. If you don't want to calculate them yourself, you can use `write_file_from_slice`.
 	pub fn write_file_from_stream(&mut self, stream: &mut dyn std::io::Read, file: &filesystem::QualFile, size: filesystem::FileSize, crc: u32, args: &filesystem::WriteArgs) -> Result<()> {
 		let address = match args.address {
 			Some(addr) => addr,
@@ -129,6 +135,7 @@ impl Device {
 		self.end_file_transfer(args.action)?;
 		Ok(())
 	}
+	/// Write to a file from a slice. The size will be the size of the slice, and the CRC will be calculated for you.
 	pub fn write_file_from_slice(&mut self, data: &[u8], file: &filesystem::QualFile, args: &filesystem::WriteArgs) -> Result<()> {
 		let mut stream = encde::util::SliceReader::new(data);
 		let crc = *<u32 as crate::crc::CrcComputable>::update_crc(&mut 0u32, data);

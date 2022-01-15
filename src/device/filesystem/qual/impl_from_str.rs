@@ -2,6 +2,7 @@ use super::super::{Category, FileName, FileType};
 use super::{QualFile, QualFileFromStrError as Error, QualFileName};
 use std::str::FromStr;
 
+/// The format is either "filename.type" (default category) or "category:filename.type".
 impl FromStr for QualFileName {
 	type Err = Error;
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -19,6 +20,7 @@ impl FromStr for QualFileName {
 	}
 }
 
+/// The format is the same as `QualFileName`; the only difference is that the type is parsed from the text after the last dot.
 impl FromStr for QualFile {
 	type Err = Error;
 	// by not implementing this in terms of QualFileName::from_str, we avoid the buffering and unbuffering through FileName instances, instead using &str until we actually need to write the data.

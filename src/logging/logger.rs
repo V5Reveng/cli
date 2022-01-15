@@ -4,11 +4,12 @@ use std::io::Write;
 
 static CRATE_PREFIX: &str = "reveng_cli::";
 
-/// The absolute most simple logger
-/// Logs to stderr and has no local level
+/// The absolute most simple logger.
+/// Logs to stderr and has no local level.
 pub struct SimpleLogger(());
 
 impl SimpleLogger {
+	/// `Log::enabled` doesn't offer enough information, so we use this instead.
 	fn actually_enabled(level: Level, module_path: Option<&str>) -> bool {
 		let max_level = module_path.and_then(|module_path| LOCAL_LEVELS.read().unwrap().get(module_path).copied()).unwrap_or_else(super::level);
 		level <= max_level

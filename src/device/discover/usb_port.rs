@@ -3,6 +3,7 @@ use serialport::{available_ports, Result, SerialPortType, UsbPortInfo};
 #[derive(Debug)]
 pub struct UsbPort {
 	pub name: String,
+	/// Pretty restricted. `UploadableInfo` can give more information.
 	pub info: UsbPortInfo,
 }
 

@@ -1,3 +1,5 @@
+//! VEX-specific CRC calculations
+
 const TABLE_SIZE: usize = u8::MAX as usize + 1;
 
 pub trait CrcComputable: Copy {

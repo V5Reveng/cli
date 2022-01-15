@@ -1,3 +1,7 @@
+//! The Presence enum, for reasoning about the existence of things.
+//!
+//! Presence represents the existence of none, one, or many of a thing.
+
 pub enum Presence<T> {
 	None,
 	One(T),

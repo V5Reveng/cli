@@ -1,3 +1,5 @@
+//! Payloads to be received with commands. These are public to the crate, as opposed to `r#impl::receive` which is private to the `Device`.
+
 use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, TimeStamp};
 use super::helpers::{LongVersion, Product, ShortVersion, SystemID};
 use encde::Decode;
@@ -16,6 +18,7 @@ pub struct ExtendedDeviceInfo {
 	pub cpu0_version: ShortVersion,
 	#[encde(pad_after = 3)]
 	pub cpu1_version: ShortVersion,
+	/// Meaning unknown
 	pub touch_version: u8,
 	#[encde(pad_after = 12)]
 	pub system_id: SystemID,
@@ -24,7 +27,7 @@ pub struct ExtendedDeviceInfo {
 #[derive(Decode)]
 pub struct ExtendedDeviceInfoNew {
 	pub common: ExtendedDeviceInfo,
-	/// This data is ignored by pros-cli so there's no way to know what it actually is.
+	/// This data is ignored by PROS CLI so there's no way to know what it actually is.
 	#[encde(pad_after = 3)]
 	pub unknown: u8,
 }
@@ -37,6 +40,7 @@ impl From<ExtendedDeviceInfoNew> for ExtendedDeviceInfo {
 
 #[derive(Decode, Debug)]
 pub struct FileMetadataByName {
+	/// `Category::None` if the file has no link.
 	linked_category: Category,
 	pub size: FileSize,
 	pub address: Address,

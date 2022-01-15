@@ -19,6 +19,7 @@ impl Runnable for Args {
 	}
 }
 
+/// Prints aligned in a table including a nice header.
 fn print_file_list(files: &[receive::FileMetadataByIndex]) {
 	println!("Num files: {}", files.len());
 	println!("Address     Mtime                       Version  Size   Type  Name\n");
@@ -40,6 +41,7 @@ fn list_in_category(dev: &mut Device, category: fs::Category) {
 	print_file_list(&files);
 }
 
+/// List the files in all *named* categories.
 fn list_all_categories(dev: &mut Device) {
 	use fs::Category::*;
 	for category in [User, System, Pros, Rms, Mw] {

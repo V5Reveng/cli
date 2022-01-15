@@ -1,3 +1,7 @@
+//! Get the location for a device.
+//! The location is the last number in the position of a USB device, and is used to distinguish between the user and system port of the VEX V5.
+//! Implementation is platform-dependent.
+
 #[cfg(target_os = "linux")]
 pub fn get_device_location(dev_name: &str) -> Result<u8, String> {
 	use log::warn;

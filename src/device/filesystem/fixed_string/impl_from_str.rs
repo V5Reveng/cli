@@ -17,6 +17,7 @@ impl<const N: usize> FromStr for FixedString<N> {
 	}
 }
 
+/// Duplicate of previous to allow for more use cases.
 impl<const N: usize> TryFrom<&str> for FixedString<N> {
 	type Error = <Self as FromStr>::Err;
 	fn try_from(s: &str) -> Result<Self, Self::Error> {

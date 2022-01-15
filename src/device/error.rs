@@ -1,5 +1,8 @@
+//! Errors that can occur during communication with the Device.
+
 use super::ResponseByte;
 
+/// The variants exactly match the `serialport::ErrorKind` variants, excluding `Io`, which is promoted to `DeviceError::Io`.
 #[derive(Debug)]
 pub enum SerialError {
 	InvalidInput,

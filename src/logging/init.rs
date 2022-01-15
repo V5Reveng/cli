@@ -15,7 +15,7 @@ static LEVELS: phf::Map<&'static str, LevelFilter> = phf_map! {
 
 static INVALID_LEVEL: &str = "Invalid log level provided via REVENG_LOG_LEVEL; valid levels are trace, debug, info, warn, error, off";
 
-/// On error, returns a reason along with the invalid string
+/// On error, returns a reason along with the invalid string.
 fn parse_and_set(raw: &str) -> Result<(), (&'static str, &str)> {
 	for item in raw.split(',') {
 		match item.rsplit_once('=') {
@@ -33,6 +33,7 @@ fn parse_and_set(raw: &str) -> Result<(), (&'static str, &str)> {
 	Ok(())
 }
 
+/// Initialize logging. Should be called before anything is logged.
 pub fn init() {
 	unsafe {
 		BASE_TIMESTAMP = Some(Instant::now());

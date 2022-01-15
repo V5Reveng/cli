@@ -1,3 +1,5 @@
+//! File identifiers "qualified" with categories.
+
 use super::{Category, FileName, FileType};
 
 pub mod error;

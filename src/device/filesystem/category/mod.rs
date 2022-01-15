@@ -8,8 +8,13 @@ pub mod impl_u8_conv;
 
 pub use error::CategoryFromStrError;
 
+/// The category of a file.
+///
+/// This is a primitive way to create subdirectories on the device's filesystem.
+/// Each category acts as one subdirectory of the root directory.
 #[derive(Debug, Eq, Clone, Copy)]
 pub enum Category {
+	/// Only received, never sent.
 	None,
 	User,
 	System,

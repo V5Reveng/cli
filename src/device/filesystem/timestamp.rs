@@ -4,6 +4,11 @@ use std::fmt::{self, Display, Formatter};
 use std::io::{Read, Write};
 use std::num::TryFromIntError;
 
+/// A timestamp on the device.
+///
+/// The device stores timestamps as seconds since 1 January 2000 at 00:00.
+/// However, we store it as a local DateTime.
+/// Why local? PROS CLI uses the godawful Python `datetime` library, which is naive to time zones, meaning it's all local to them.
 #[derive(Debug, Clone, Copy)]
 #[repr(transparent)]
 pub struct TimeStamp(DateTime<Local>);
@@ -48,6 +53,7 @@ impl From<DateTime<Local>> for TimeStamp {
 	}
 }
 
+/// The default timestamp is the current one.
 impl Default for TimeStamp {
 	fn default() -> TimeStamp {
 		Self::now()

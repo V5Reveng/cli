@@ -1,10 +1,12 @@
 use encde::{Decode, Encode};
 
+/// The target of file transfers.
 #[derive(Encode, Decode, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Target {
 	Ddr = 0,
 	Flash = 1,
+	/// Download only
 	Screen = 2,
 }
 

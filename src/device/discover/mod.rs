@@ -1,3 +1,5 @@
+//! Device discovery
+
 mod classification;
 pub mod error;
 mod location;

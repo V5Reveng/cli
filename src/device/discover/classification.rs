@@ -1,3 +1,5 @@
+//! Classification of USB ports.
+
 use super::location::get_device_location;
 use super::usb_port::UsbPort;
 
