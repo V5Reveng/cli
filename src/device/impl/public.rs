@@ -74,11 +74,17 @@ impl Device {
 
 	pub fn read_file_to_stream(&mut self, stream: &mut dyn std::io::Write, file: &filesystem::QualFile, args: &filesystem::ReadArgs) -> Result<()> {
 		debug!("reading file {}", file);
-		let file_metadata = self
-			.get_file_metadata_by_name(&send::FileMetadataByName::new(&file.common))?
-			.ok_or(DeviceError::Protocol(ProtocolError::Nack(ResponseByte::Enoent)))?;
-		let size = args.size.unwrap_or(file_metadata.size);
-		let address = args.address.unwrap_or(file_metadata.address);
+		let (size, address) = match (args.size, args.address) {
+			(Some(size), Some(address)) => (size, address),
+			(maybe_size, maybe_address) => {
+				let file_metadata = self
+					.get_file_metadata_by_name(&send::FileMetadataByName::new(&file.common))?
+					.ok_or(DeviceError::Protocol(ProtocolError::Nack(ResponseByte::Enoent)))?;
+				let size = maybe_size.unwrap_or(file_metadata.size);
+				let address = maybe_address.unwrap_or(file_metadata.address);
+				(size, address)
+			}
+		};
 		let transfer_info = self.start_file_transfer(&priv_send::StartFileTransfer {
 			function: filesystem::Function::Download,
 			target: args.target,
