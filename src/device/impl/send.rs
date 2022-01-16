@@ -69,3 +69,19 @@ impl FileTransferSetLink {
 		}
 	}
 }
+
+#[derive(Encode)]
+pub struct FileTransferSetChannel {
+	/// Currently unused.
+	options: u8,
+	pub channel: Channel,
+}
+
+impl FileTransferSetChannel {
+	pub fn new(channel: Channel) -> Self {
+		Self {
+			options: 1, // mimic PROS CLI
+			channel,
+		}
+	}
+}

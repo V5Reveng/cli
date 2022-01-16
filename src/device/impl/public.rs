@@ -107,6 +107,7 @@ impl Device {
 			Some(addr) => addr,
 			None => self.get_file_metadata_by_name(&send::FileMetadataByName::new(&file.common))?.map(|x| x.address).unwrap_or(filesystem::DEFAULT_ADDRESS),
 		};
+		self.set_transfer_channel(filesystem::Channel::FileTransfer)?;
 		let transfer_info = self.start_file_transfer(&priv_send::StartFileTransfer {
 			function: filesystem::Function::Upload,
 			target: filesystem::Target::Flash,
@@ -132,6 +133,7 @@ impl Device {
 		// if this doesn't work, try halving the max_packet_size
 		self.ft_write(stream, size, address, transfer_info.max_packet_size)?;
 		self.end_file_transfer(args.action)?;
+		self.set_transfer_channel(filesystem::Channel::Pit)?;
 		Ok(())
 	}
 	/// Write to a file from a slice. The size will be the size of the slice, and the CRC will be calculated for you.

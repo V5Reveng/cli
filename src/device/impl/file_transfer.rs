@@ -90,6 +90,11 @@ impl Device {
 		debug!("set link to {}", linked_file);
 		self.ext_command_with_data::<_, ()>(0x15, &priv_send::FileTransferSetLink::new(linked_file))
 	}
+	/// Set the channel for wireless file transfers. The download channel is faster.
+	pub fn set_transfer_channel(&mut self, channel: filesystem::Channel) -> Result<()> {
+		debug!("set channel to {}", channel);
+		self.ext_command_with_data::<_, ()>(0x10, &priv_send::FileTransferSetChannel::new(channel))
+	}
 	/// End the file transfer started with `start_file_transfer`, performing the specified action.
 	pub fn end_file_transfer(&mut self, action: filesystem::TransferCompleteAction) -> Result<()> {
 		debug!("end");
