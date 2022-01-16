@@ -15,3 +15,13 @@ impl Default for Channel {
 		Self::Pit
 	}
 }
+
+impl std::fmt::Display for Channel {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let s = match self {
+			Self::Pit => "PIT",
+			Self::FileTransfer => "File Transfer",
+		};
+		formatter.write_str(s)
+	}
+}
