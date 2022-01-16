@@ -16,7 +16,7 @@ fn pad(size: filesystem::PacketSize) -> filesystem::PacketSize {
 impl Device {
 	/// Start a file transfer, which allows for file-related operations, and can be terminated with `end_file_transfer`.
 	pub fn start_file_transfer(&mut self, args: &priv_send::StartFileTransfer) -> Result<priv_receive::StartFileTransfer> {
-		debug!("start file transfer");
+		debug!("start");
 		self.ext_command_with_data(0x11, &args)
 	}
 	/// Issue a single read command from the specified base address into the provided slice.
@@ -24,7 +24,7 @@ impl Device {
 		const COMMAND_ID: CommandId = 0x14;
 		let amount_to_read: filesystem::PacketSize = data.len().try_into().expect("Buffer is too large to read with ft_read_single");
 		let amount_to_read = pad(amount_to_read);
-		debug!("file transfer: rx chunk of {} (padded to {}) bytes", data.len(), amount_to_read);
+		debug!("rx chunk of {} (padded to {}) bytes", data.len(), amount_to_read);
 		let send = priv_send::FileTransferRead { address: base_address, size: amount_to_read };
 		self.begin_ext_command(COMMAND_ID, &encde::util::encode_to_vec(&send)?)?;
 		let payload_len = self.rx_ext_command_header(COMMAND_ID)? - std::mem::size_of::<u32>();
@@ -44,7 +44,7 @@ impl Device {
 	/// May issue multiple actual read commands via `ft_read_single`.
 	/// Returns the CRC of the data that was read.
 	pub fn ft_read(&mut self, stream: &mut dyn Write, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<u32> {
-		debug!("file transfer: read {} bytes from 0x{:0>8x}, max packet size is {}", size, base_address, max_packet_size);
+		debug!("read {} bytes from 0x{:0>8x}, max packet size is {}", size, base_address, max_packet_size);
 		let mut buffer = vec![0u8; max_packet_size as usize];
 		let mut crc = 0;
 		while size > 0 {
@@ -62,7 +62,7 @@ impl Device {
 		const COMMAND_ID: CommandId = 0x13;
 		let amount_to_write: filesystem::PacketSize = data.len().try_into().expect("Buffer is too large to write with ft_write_single");
 		let amount_to_write = pad(amount_to_write);
-		debug!("file transfer: rx chunk of {} (padded to {}) bytes", data.len(), amount_to_write);
+		debug!("rx chunk of {} (padded to {}) bytes", data.len(), amount_to_write);
 		self.tx_ext_command_header(COMMAND_ID, std::mem::size_of_val(&base_address) + amount_to_write as usize)?;
 		self.tx(&base_address)?;
 		self.tx_raw_data(data)?;
@@ -74,7 +74,7 @@ impl Device {
 	/// Write the specified amount of data from the stream.
 	/// May issue multiple actual write commands via `ft_write_single`.
 	pub fn ft_write(&mut self, stream: &mut dyn Read, mut size: filesystem::FileSize, mut base_address: filesystem::Address, max_packet_size: filesystem::PacketSize) -> Result<()> {
-		debug!("file transfer: write {} to 0x{:0>8x}, max packet size is {}", size, base_address, max_packet_size);
+		debug!("write {} to 0x{:0>8x}, max packet size is {}", size, base_address, max_packet_size);
 		let mut buffer = vec![0u8; max_packet_size as usize];
 		while size > 0 {
 			let this_packet_size = std::cmp::min(size as usize, max_packet_size as usize);
@@ -87,12 +87,12 @@ impl Device {
 	}
 	/// Set the link of a file. For unknown reasons this can only occur during a file transfer.
 	pub fn ft_set_link(&mut self, linked_file: &filesystem::QualFileName) -> Result<()> {
-		debug!("file transfer: set link to {}", linked_file);
+		debug!("set link to {}", linked_file);
 		self.ext_command_with_data::<_, ()>(0x15, &priv_send::FileTransferSetLink::new(linked_file))
 	}
 	/// End the file transfer started with `start_file_transfer`, performing the specified action.
 	pub fn end_file_transfer(&mut self, action: filesystem::TransferCompleteAction) -> Result<()> {
-		debug!("end file transfer");
+		debug!("end");
 		self.ext_command_with_data::<_, ()>(0x12, &action)
 	}
 }
