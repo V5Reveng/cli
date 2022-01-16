@@ -94,7 +94,7 @@ impl Device {
 		})?;
 		let crc = self.ft_read(stream, size, address, transfer_info.max_packet_size)?;
 		self.end_file_transfer(filesystem::TransferCompleteAction::default())?;
-		if crc != transfer_info.crc {
+		if !args.ignore_crc && crc != transfer_info.crc {
 			Err(DeviceError::Protocol(ProtocolError::InvalidCrc))
 		} else {
 			Ok(())

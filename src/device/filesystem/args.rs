@@ -10,6 +10,8 @@ pub struct ReadArgs {
 	pub address: Option<Address>,
 	/// If not specified, read the entire file.
 	pub size: Option<FileSize>,
+	/// Ignore the CRC check
+	pub ignore_crc: bool,
 }
 
 /// Extra arguments to `write_file_from_{stream,slice}`.
