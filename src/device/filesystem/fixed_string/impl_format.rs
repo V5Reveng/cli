@@ -1,15 +1,17 @@
 use super::FixedString;
-use std::fmt::{self, Error, Formatter, Result};
+use std::fmt::{self, Formatter, Result};
 
 impl<const N: usize> fmt::Debug for FixedString<N> {
 	fn fmt(&self, formatter: &mut Formatter) -> Result {
-		write!(formatter, "FixedString<{}> ", N)?;
-		self.as_str().map_err(|_| Error::default())?.fmt(formatter)
+		write!(formatter, "FixedString<{}> \"{:?}\"", N, self.as_bytes())
 	}
 }
 
 impl<const N: usize> fmt::Display for FixedString<N> {
 	fn fmt(&self, formatter: &mut Formatter) -> Result {
-		self.as_str().map_err(|_| Error::default())?.fmt(formatter)
+		match self.as_str() {
+			Ok(s) => s.fmt(formatter),
+			Err(_) => write!(formatter, "{:?}", self.as_bytes()),
+		}
 	}
 }

@@ -1,33 +1,20 @@
 use super::{FixedString, FixedStringFromStrError as Error};
 use std::convert::TryFrom;
-use std::ffi::OsStr;
-use std::str::FromStr;
 
-impl<const N: usize> FromStr for FixedString<N> {
-	type Err = Error;
-	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		if s.len() > N {
-			return Err(Self::Err::TooLong);
+impl<const N: usize> TryFrom<&[u8]> for FixedString<N> {
+	type Error = Error;
+	fn try_from(data: &[u8]) -> Result<Self, Self::Error> {
+		if data.len() > N {
+			return Err(Self::Error::TooLong);
+		}
+		if let Some(nul_pos) = data.iter().position(|&x| x == 0) {
+			return Err(Self::Error::ContainsNul { position: nul_pos });
 		}
 		let mut ret: Self = Self::default();
-		for (idx, byte) in s.bytes().chain(std::iter::repeat(0)).take(N).enumerate() {
+		// default is zeroed so no need to zero-fill again; just write the actual data.
+		for (idx, &byte) in data.iter().enumerate() {
 			ret.0[idx] = byte;
 		}
 		Ok(ret)
-	}
-}
-
-/// Duplicate of previous to allow for more use cases.
-impl<const N: usize> TryFrom<&str> for FixedString<N> {
-	type Error = <Self as FromStr>::Err;
-	fn try_from(s: &str) -> Result<Self, Self::Error> {
-		Self::from_str(s)
-	}
-}
-
-impl<const N: usize> TryFrom<&OsStr> for FixedString<N> {
-	type Error = Error;
-	fn try_from(s: &OsStr) -> Result<Self, Self::Error> {
-		Self::from_str(s.to_str().ok_or(Self::Error::InvalidUnicode)?)
 	}
 }

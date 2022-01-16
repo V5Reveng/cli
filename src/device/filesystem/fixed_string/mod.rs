@@ -20,14 +20,11 @@ impl<const N: usize> Default for FixedString<N> {
 }
 
 impl<const N: usize> FixedString<N> {
+	pub fn as_bytes(&self) -> &[u8] {
+		let end = self.0.iter().position(|&x| x == 0).unwrap_or(self.0.len());
+		&self.0[0..end]
+	}
 	pub fn as_str(&self) -> Result<&str, std::str::Utf8Error> {
-		let mut len = N;
-		for (idx, &byte) in self.0.iter().enumerate() {
-			if byte == 0 {
-				len = idx;
-				break;
-			}
-		}
-		std::str::from_utf8(&self.0[..len])
+		std::str::from_utf8(self.as_bytes())
 	}
 }

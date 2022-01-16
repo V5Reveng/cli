@@ -9,12 +9,12 @@ impl FromStr for QualFileName {
 		if let Some((category, name)) = s.split_once(':') {
 			Ok(Self {
 				category: Category::from_str(category).map_err(Self::Err::Category)?,
-				name: FileName::from_str(name).map_err(Self::Err::FileName)?,
+				name: FileName::try_from(name.as_bytes()).map_err(Self::Err::FileName)?,
 			})
 		} else {
 			Ok(Self {
 				category: Category::default(),
-				name: FileName::from_str(s).map_err(Self::Err::FileName)?,
+				name: FileName::try_from(s.as_bytes()).map_err(Self::Err::FileName)?,
 			})
 		}
 	}
@@ -45,9 +45,9 @@ impl FromStr for QualFile {
 		Ok(Self {
 			common: QualFileName {
 				category: ret_category,
-				name: FileName::from_str(ret_name).map_err(Self::Err::FileName)?,
+				name: FileName::try_from(ret_name.as_bytes()).map_err(Self::Err::FileName)?,
 			},
-			ty: FileType::from_str(ret_ty).map_err(Self::Err::FileType)?,
+			ty: FileType::try_from(ret_ty.as_bytes()).map_err(Self::Err::FileType)?,
 		})
 	}
 }
