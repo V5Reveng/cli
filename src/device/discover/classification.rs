@@ -19,18 +19,20 @@ pub enum Classification {
 	Controller,
 }
 
-pub fn classify(port: &UsbPort) -> Classification {
-	use Classification::*;
-	match port.info.vid {
-		VEX_VENDOR_ID => match port.info.pid {
-			CONTROLLER_PRODUCT_ID => Controller,
-			BRAIN_PRODUCT_ID => match get_device_location(&port.name).expect("Device location detection failed") {
-				0 => Brain,
-				2 => BrainUser,
+impl Classification {
+	pub fn classify(port: &UsbPort) -> Self {
+		use Classification::*;
+		match port.info.vid {
+			VEX_VENDOR_ID => match port.info.pid {
+				CONTROLLER_PRODUCT_ID => Controller,
+				BRAIN_PRODUCT_ID => match get_device_location(&port.name).expect("Device location detection failed") {
+					0 => Brain,
+					2 => BrainUser,
+					_ => UnknownVexDevice,
+				},
 				_ => UnknownVexDevice,
 			},
-			_ => UnknownVexDevice,
-		},
-		_ => NotVex,
+			_ => NotVex,
+		}
 	}
 }

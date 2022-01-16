@@ -1,7 +1,7 @@
 //! This module can be used to get the list of uploadable V5 devices. (Uploadable refers to devices to which a program can be uploaded.)
 
-use super::classification::{classify, Classification};
-use super::usb_port::{get_usb_devices, UsbPort};
+use super::classification::Classification;
+use super::usb_port::UsbPort;
 use super::{UploadableInfoFromPathError as FPError, UploadableType};
 use std::path::Path;
 
@@ -16,7 +16,7 @@ impl TryFrom<UsbPort> for UploadableInfo {
 	/// This is a bit ugly, but we can just pass the (non-uploadable) device type as the error
 	type Error = Classification;
 	fn try_from(port: UsbPort) -> Result<Self, Self::Error> {
-		match classify(&port) {
+		match Classification::classify(&port) {
 			Classification::Brain => Ok(Self {
 				name: port.name,
 				device_type: UploadableType::Brain,
@@ -45,6 +45,6 @@ impl TryFrom<&Path> for UploadableInfo {
 
 impl UploadableInfo {
 	pub fn get_all() -> serialport::Result<Vec<UploadableInfo>> {
-		Ok(get_usb_devices()?.into_iter().filter_map(|x| UploadableInfo::try_from(x).ok()).collect::<Vec<_>>())
+		Ok(UsbPort::get_all()?.into_iter().filter_map(|x| UploadableInfo::try_from(x).ok()).collect::<Vec<_>>())
 	}
 }
