@@ -44,7 +44,7 @@ impl CrcSerialPort {
 	pub fn end_tx_crc(&mut self) -> Result<()> {
 		let checksum = self.tx_crc.to_be_bytes();
 		debug!("end tx crc with checksum {:#04x}", self.tx_crc);
-		self.write(&checksum)?;
+		self.write_all(&checksum)?;
 		Ok(())
 	}
 }

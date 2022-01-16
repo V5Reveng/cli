@@ -6,6 +6,6 @@ pub fn lenient_u64_from_str(s: &str) -> Result<u64, std::num::ParseIntError> {
 	} else if let Some(s) = s.strip_prefix("0b") {
 		u64::from_str_radix(s, 2)
 	} else {
-		u64::from_str_radix(s, 10)
+		s.parse()
 	}
 }
