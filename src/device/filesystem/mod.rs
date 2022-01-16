@@ -19,7 +19,7 @@ pub use target::*;
 pub use timestamp::*;
 
 /// What to do when the file transfer, specifically of an executable, completes.
-#[derive(Encode, Decode, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Encode, Decode, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum TransferCompleteAction {
 	NoRun = 0b00,

@@ -2,6 +2,7 @@
 //!
 //! Presence represents the existence of none, one, or many of a thing.
 
+#[derive(Debug)]
 pub enum Presence<T> {
 	None,
 	One(T),
@@ -27,6 +28,7 @@ impl<T> From<Option<T>> for Presence<T> {
 	}
 }
 
+#[derive(Debug)]
 pub enum NotOne<T> {
 	None,
 	Many(Vec<T>),

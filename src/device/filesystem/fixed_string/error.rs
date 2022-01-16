@@ -1,7 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 
 /// Variants are documented in the Display implementation.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum FixedStringFromStrError {
 	TooLong,
 	ContainsNul { position: usize },

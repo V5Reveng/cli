@@ -1,7 +1,7 @@
 use super::Category;
 use std::fmt::{self, Display, Formatter};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum CategoryFromStrError {
 	UnknownCategory,
 	TooLarge,

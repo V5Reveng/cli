@@ -1,7 +1,7 @@
 use super::super::{CategoryFromStrError, FixedStringFromStrError};
 use std::fmt::{self, Display, Formatter};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum QualFileFromStrError {
 	Category(CategoryFromStrError),
 	FileName(FixedStringFromStrError),

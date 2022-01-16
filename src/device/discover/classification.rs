@@ -7,7 +7,7 @@ const VEX_VENDOR_ID: u16 = 0x2888;
 const CONTROLLER_PRODUCT_ID: u16 = 0x0503;
 const BRAIN_PRODUCT_ID: u16 = 0x0501;
 
-#[derive(PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Classification {
 	NotVex,
 	/// Has the Vex vendor ID, but an unknown product ID

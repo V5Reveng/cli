@@ -4,13 +4,13 @@ use std::fmt::{self, Display, Formatter};
 pub mod version;
 pub use version::{LongVersion, ShortVersion};
 
-#[derive(Decode)]
+#[derive(Decode, Clone, Copy)]
 pub struct BrainFlags(u8);
 impl BrainFlags {
 	// empty
 }
 
-#[derive(Decode)]
+#[derive(Decode, Clone, Copy)]
 pub struct ControllerFlags(u8);
 impl ControllerFlags {
 	pub fn connected(&self) -> bool {
@@ -18,7 +18,7 @@ impl ControllerFlags {
 	}
 }
 
-#[derive(Decode)]
+#[derive(Decode, Clone, Copy)]
 #[repr(u8)]
 pub enum Product {
 	#[encde(wire_tag = 0x10)]

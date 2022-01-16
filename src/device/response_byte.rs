@@ -3,7 +3,7 @@ use std::fmt::{self, Display, Formatter};
 
 #[repr(u8)]
 #[must_use = "This may be a NACK, which should be handled"]
-#[derive(Encode, Decode, PartialEq, Eq, Debug)]
+#[derive(Encode, Decode, PartialEq, Eq, Debug, Copy, Clone, Hash)]
 #[deny(missing_docs)]
 pub enum ResponseByte {
 	/// No error occurred.

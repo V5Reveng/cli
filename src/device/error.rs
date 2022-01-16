@@ -3,14 +3,14 @@
 use super::ResponseByte;
 
 /// The variants exactly match the `serialport::ErrorKind` variants, excluding `Io`, which is promoted to `DeviceError::Io`.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SerialError {
 	InvalidInput,
 	Unknown,
 	NoDevice,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ProtocolError {
 	WrongData { entity: &'static str, expected: Box<[u8]>, received: Box<[u8]> },
 	BadLength { entity: &'static str, received_length: usize },
