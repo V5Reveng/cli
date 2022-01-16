@@ -16,6 +16,7 @@ clap-num = "1.0.0"
 encde = { path = "encde", features = ["derive"] }
 log = "0.4.14"
 phf = { version = "0.10", features = ["macros"] }
+png = "0.17.2"
 rand = "0.8.4"
 serialport = "4.0.1"
 

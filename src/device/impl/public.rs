@@ -156,4 +156,9 @@ impl Device {
 		self.end_file_transfer(Default::default())?;
 		Ok(())
 	}
+
+	pub fn capture_screen(&mut self, output_stream: &mut dyn std::io::Write) -> Result<()> {
+		self.prepare_screen_capture()?;
+		self.receive_screen_capture(output_stream)
+	}
 }
