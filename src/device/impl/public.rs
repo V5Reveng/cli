@@ -14,11 +14,10 @@ impl Device {
 
 	fn has_new_ext_dev_info(&mut self) -> Result<bool> {
 		let device_info = self.device_info()?;
-		let min_version = match device_info.product {
-			helpers::Product::Brain(_) => helpers::LongVersion::new(1, 0, 13, 0, 0),
-			helpers::Product::Controller(_) => helpers::LongVersion::new(1, 0, 0, 0, 70),
-		};
-		Ok(device_info.version >= min_version)
+		Ok(match device_info.product {
+			helpers::Product::Brain(_) => device_info.version >= helpers::LongVersion::new(1, 0, 13, 0, 0),
+			helpers::Product::Controller(_) => false,
+		})
 	}
 	pub fn extended_device_info(&mut self) -> Result<receive::ExtendedDeviceInfo> {
 		debug!("sending extended device info command");

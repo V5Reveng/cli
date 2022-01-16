@@ -14,6 +14,9 @@ impl BrainFlags {
 pub struct ControllerFlags(u8);
 impl ControllerFlags {
 	pub fn connected(&self) -> bool {
+		self.0 & 0b1 == 0b1
+	}
+	pub fn wireless(&self) -> bool {
 		self.0 & 0b10 == 0b10
 	}
 }
@@ -31,7 +34,7 @@ impl Display for Product {
 	fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
 		match self {
 			Self::Brain(_) => f.write_str("brain"),
-			Self::Controller(flags) => write!(f, "controller (connected: {})", flags.connected()),
+			Self::Controller(flags) => write!(f, "controller (connected: {}; wireless: {})", flags.connected(), flags.wireless()),
 		}
 	}
 }
