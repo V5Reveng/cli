@@ -3,14 +3,14 @@
 use crate::commands::Runnable;
 use std::path::PathBuf;
 
-#[derive(clap::Parser)]
 /// Mount the device as a FUSE filesystem.
+#[derive(clap::Parser)]
 pub struct Args {
 	mount_point: PathBuf,
 }
 
 impl Runnable for Args {
-	fn run(self, _dev: crate::presence::Presence<crate::device::Device>) -> u32 {
+	fn run(self, _dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
 		todo!();
 	}
 }

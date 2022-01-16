@@ -1,3 +1,8 @@
+//! The Presence enum, for reasoning about the existence of things.
+//!
+//! Presence represents the existence of none, one, or many of a thing.
+
+#[derive(Debug)]
 pub enum Presence<T> {
 	None,
 	One(T),
@@ -23,7 +28,8 @@ impl<T> From<Option<T>> for Presence<T> {
 	}
 }
 
-enum NotOne<T> {
+#[derive(Debug)]
+pub enum NotOne<T> {
 	None,
 	Many(Vec<T>),
 }

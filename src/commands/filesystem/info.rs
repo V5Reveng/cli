@@ -1,15 +1,15 @@
 use crate::commands::Runnable;
 use crate::device::{filesystem as fs, send};
 
-#[derive(clap::Parser)]
 /// Print a file's metadata.
+#[derive(clap::Parser)]
 pub struct Args {
 	/// Remote file.
 	file: fs::QualFileName,
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
+	fn run(self, dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 		let send_data = send::FileMetadataByName::new(&self.file);
 		let metadata = dev.get_file_metadata_by_name(&send_data).unwrap().expect("File does not exist");

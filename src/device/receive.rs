@@ -1,5 +1,7 @@
-use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, PacketSize, TimeStamp};
-use super::helpers::{LongVersion, Product, ShortVersion, SystemID};
+//! Payloads to be received with commands. These are public to the crate, as opposed to `r#impl::receive` which is private to the `Device`.
+
+use super::filesystem::{Address, Category, FileIndex, FileName, FileSize, FileType, TimeStamp};
+use super::helpers::{LongVersion, Product, ShortVersion, SystemId};
 use encde::Decode;
 
 #[derive(Decode)]
@@ -16,15 +18,16 @@ pub struct ExtendedDeviceInfo {
 	pub cpu0_version: ShortVersion,
 	#[encde(pad_after = 3)]
 	pub cpu1_version: ShortVersion,
+	/// Meaning unknown
 	pub touch_version: u8,
 	#[encde(pad_after = 12)]
-	pub system_id: SystemID,
+	pub system_id: SystemId,
 }
 
 #[derive(Decode)]
 pub struct ExtendedDeviceInfoNew {
 	pub common: ExtendedDeviceInfo,
-	/// This data is ignored by pros-cli so there's no way to know what it actually is.
+	/// This data is ignored by PROS CLI so there's no way to know what it actually is.
 	#[encde(pad_after = 3)]
 	pub unknown: u8,
 }
@@ -37,6 +40,7 @@ impl From<ExtendedDeviceInfoNew> for ExtendedDeviceInfo {
 
 #[derive(Decode, Debug)]
 pub struct FileMetadataByName {
+	/// `Category::None` if the file has no link.
 	linked_category: Category,
 	pub size: FileSize,
 	pub address: Address,
@@ -46,9 +50,10 @@ pub struct FileMetadataByName {
 	pub version: ShortVersion,
 	linked_name: FileName,
 }
+
 impl FileMetadataByName {
 	pub fn is_link(&self) -> bool {
-		self.linked_category != Category::None
+		!self.linked_category.is_none()
 	}
 	pub fn get_link(&self) -> Option<(Category, &FileName)> {
 		if self.is_link() {
@@ -58,6 +63,7 @@ impl FileMetadataByName {
 		}
 	}
 }
+
 #[derive(Decode, Debug)]
 pub struct FileMetadataByIndex {
 	pub idx: FileIndex,
@@ -72,10 +78,3 @@ pub struct FileMetadataByIndex {
 
 #[derive(Decode)]
 pub struct NumFiles(pub i16);
-
-#[derive(Decode)]
-pub(super) struct StartFileTransfer {
-	pub max_packet_size: PacketSize,
-	pub file_size: FileSize,
-	pub crc: u32,
-}

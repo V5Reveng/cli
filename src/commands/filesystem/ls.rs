@@ -1,15 +1,15 @@
 use crate::commands::Runnable;
 use crate::device::{filesystem as fs, receive, Device};
 
-#[derive(clap::Parser)]
 /// List files in a category, or all files.
+#[derive(clap::Parser)]
 pub struct Args {
 	/// If category is not specified, only files in named categories are listed.
 	category: Option<fs::Category>,
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<Device>) -> u32 {
+	fn run(self, dev: crate::util::presence::Presence<Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 		match self.category {
 			Some(category) => list_in_category(&mut dev, category),
@@ -19,6 +19,7 @@ impl Runnable for Args {
 	}
 }
 
+/// Prints aligned in a table including a nice header.
 fn print_file_list(files: &[receive::FileMetadataByIndex]) {
 	println!("Num files: {}", files.len());
 	println!("Address     Mtime                       Version  Size   Type  Name\n");
@@ -40,9 +41,9 @@ fn list_in_category(dev: &mut Device, category: fs::Category) {
 	print_file_list(&files);
 }
 
+/// List the files in all *named* categories.
 fn list_all_categories(dev: &mut Device) {
-	use fs::Category::*;
-	for category in [User, System, Pros, Rms, Mw] {
+	for &category in fs::Category::named() {
 		let files = dev.list_all_files(category).unwrap();
 		println!("Category: {}", category);
 		print_file_list(&files);

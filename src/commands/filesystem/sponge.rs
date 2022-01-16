@@ -3,10 +3,10 @@ use crate::device::filesystem as fs;
 use clap_num::maybe_hex;
 use std::io::{stdin, Read};
 
-#[derive(clap::Parser)]
 /// Write stdin to a remote file.
 ///
 /// To "push" a file to the device, you can add ` < local.file` to the command line.
+#[derive(clap::Parser)]
 pub struct Args {
 	/// Remote file.
 	file: fs::QualFile,
@@ -28,7 +28,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: crate::presence::Presence<crate::device::Device>) -> u32 {
+	fn run(self, dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 		let mut data = Vec::default();
 		// we have to buffer this to have the size and the CRC

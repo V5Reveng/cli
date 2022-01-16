@@ -1,9 +1,12 @@
+//! The Reveng CLI allows for interfacing with the VEX V5 Cortex.
+//!
+//! Unlike alternatives, it is actually open source, with no files excluded.
+
 mod commands;
 mod crc;
 mod device;
 mod logging;
-mod presence;
-mod temp_dir;
+mod util;
 
 fn main() {
 	logging::init();

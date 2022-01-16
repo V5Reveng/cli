@@ -1,7 +1,9 @@
+//! The user interface on the command line.
+
 use crate::device::Device;
 use crate::device::UploadableInfo;
 use crate::logging;
-use crate::presence::Presence;
+use crate::util::presence::Presence;
 use clap::Parser;
 use std::path::PathBuf;
 
@@ -9,6 +11,7 @@ mod device;
 mod filesystem;
 mod program;
 
+/// A command that can be run with an arbitrary number of devices present (none, one, or many).
 trait Runnable {
 	fn run(self, device: Presence<Device>) -> u32;
 }
@@ -33,8 +36,8 @@ impl Runnable for Subcommand {
 #[derive(Parser)]
 #[clap(about, version, author)]
 struct Args {
-	#[clap(long = "verbose", short, parse(from_occurrences))]
 	/// Increase verbosity.
+	#[clap(long = "verbose", short, parse(from_occurrences))]
 	verbosity: usize,
 	/// Specify the path to the device
 	#[cfg_attr(target_family = "unix", doc = "e.g., /dev/ttyACM0.")]
@@ -64,6 +67,7 @@ pub fn run() -> u32 {
 	Args::parse().run()
 }
 
+/// Supplies standard messages to the `expect_one` method on a `Presence` instance.
 pub fn unwrap_device_presence(pres: Presence<Device>) -> Device {
 	pres.expect_one("No uploadable devices found.", "Multiple uploadable devices found. You can specify just one with the --device-path argument.")
 }

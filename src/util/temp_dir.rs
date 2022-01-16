@@ -2,24 +2,30 @@ use rand::distributions::{Distribution, Uniform};
 use std::fs::{create_dir, remove_dir_all};
 use std::path::{Path, PathBuf};
 
+/// An exclusive temporary directory unique to this instance.
 #[repr(transparent)]
 pub struct TempDir(PathBuf);
+
+/// The directory is deleted when dropped.
 impl Drop for TempDir {
 	fn drop(&mut self) {
 		remove_dir_all(self).expect("Cleaning up temporary directory");
 	}
 }
+
 impl std::ops::Deref for TempDir {
 	type Target = Path;
 	fn deref(&self) -> &Self::Target {
 		&self.0
 	}
 }
+
 impl AsRef<Path> for TempDir {
 	fn as_ref(&self) -> &Path {
 		&self.0
 	}
 }
+
 impl TempDir {
 	pub fn new() -> std::io::Result<Self> {
 		const NUM_RAND_CHARS: usize = 24;

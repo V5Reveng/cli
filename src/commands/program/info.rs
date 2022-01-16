@@ -1,7 +1,7 @@
 use crate::commands::Runnable;
 
-#[derive(clap::Parser)]
 /// Get info for a specific slot.
+#[derive(clap::Parser)]
 pub struct Args {
 	#[clap(long, group = "program")]
 	name: Option<String>,
@@ -10,7 +10,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, _dev: crate::presence::Presence<crate::device::Device>) -> u32 {
+	fn run(self, _dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
 		todo!()
 	}
 }
