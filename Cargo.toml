@@ -19,6 +19,8 @@ phf = { version = "0.10", features = ["macros"] }
 png = "0.17.2"
 rand = "0.8.4"
 serialport = "4.0.1"
+serde = { version = "1.0.133", features = ["derive"] }
+serde_ini = "0.2.0"
 
 [features]
 
