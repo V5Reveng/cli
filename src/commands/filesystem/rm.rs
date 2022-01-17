@@ -15,7 +15,11 @@ impl Runnable for Args {
 	fn run(self, dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
 		let mut dev = crate::commands::unwrap_device_presence(dev);
 		let args = fs::DeleteArgs { include_linked: self.include_linked };
-		dev.delete_file(&self.file, &args).unwrap();
-		0
+		if dev.delete_file(&self.file, &args).unwrap() {
+			0
+		} else {
+			eprintln!("No such file or directory");
+			1
+		}
 	}
 }

@@ -150,11 +150,20 @@ impl Device {
 		self.write_file_from_stream(&mut stream, file, size, crc, args)
 	}
 
-	pub fn delete_file(&mut self, file: &filesystem::QualFileName, args: &filesystem::DeleteArgs) -> Result<()> {
-		self.ext_command_with_data::<_, ()>(0x1b, &priv_send::DeleteFile::new(file, args.include_linked))?;
+	pub fn delete_file(&mut self, file: &filesystem::QualFileName, args: &filesystem::DeleteArgs) -> Result<bool> {
+		let ret = self.ext_command_with_data::<_, ()>(0x1b, &priv_send::DeleteFile::new(file, args.include_linked));
+		let was_deleted = match ret {
+			Ok(_) => true,
+			Err(DeviceError::Protocol(ProtocolError::Nack(ResponseByte::Enoent | ResponseByte::ProgramFileError))) => false,
+			Err(err) => {
+				return Err(err);
+			}
+		};
 		// I'm not convinced that this is necessary, but the PROS CLI includes it.
-		self.end_file_transfer(Default::default())?;
-		Ok(())
+		if was_deleted {
+			self.end_file_transfer(Default::default())?;
+		}
+		Ok(was_deleted)
 	}
 
 	pub fn capture_screen(&mut self, output_stream: &mut dyn std::io::Write) -> Result<()> {
