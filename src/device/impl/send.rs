@@ -85,3 +85,27 @@ impl FileTransferSetChannel {
 		}
 	}
 }
+
+#[derive(Encode)]
+pub struct ExecuteFile {
+	pub category: Category,
+	options: u8,
+	pub name: FileName,
+}
+
+impl ExecuteFile {
+	pub fn start(file: &QualFileName) -> Self {
+		Self {
+			category: file.category,
+			options: 0,
+			name: file.name,
+		}
+	}
+	pub fn stop() -> Self {
+		Self {
+			category: Default::default(),
+			options: 0x80,
+			name: Default::default(),
+		}
+	}
+}

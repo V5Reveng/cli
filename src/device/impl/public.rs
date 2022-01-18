@@ -170,4 +170,12 @@ impl Device {
 		self.prepare_screen_capture()?;
 		self.receive_screen_capture(output_stream)
 	}
+
+	pub fn execute_file(&mut self, file: &filesystem::QualFileName) -> Result<()> {
+		self.ext_command_with_data::<_, ()>(0x18, &priv_send::ExecuteFile::start(file))
+	}
+
+	pub fn stop_execution(&mut self) -> Result<()> {
+		self.ext_command_with_data::<_, ()>(0x18, &priv_send::ExecuteFile::stop())
+	}
 }
