@@ -1,17 +1,28 @@
 use crate::commands::Runnable;
+use crate::device::filesystem::QualFileName;
+use crate::program::{self, SlotNumber};
+use std::str::FromStr;
 
-/// Remove (a) program(s).
+/// Run a program.
 #[derive(clap::Parser)]
 pub struct Args {
-	/// Not required if there is only one program, or if the current directory is a project. If the latter is true, the program will only be run, not uploaded; if the program has not yet been uploaded an error will occur.
-	#[clap(long, group = "program")]
-	name: Option<String>,
-	#[clap(long, group = "program")]
-	slot: Option<u8>,
+	/// If specified, the "slot" argument will be interpreted as a qualified filename rather than a slot number.
+	#[clap(long, short)]
+	raw: bool,
+	/// The slot number (or qualified filename if `--raw`) to execute.
+	slot: String,
 }
 
 impl Runnable for Args {
-	fn run(self, _dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
-		todo!()
+	fn run(self, dev: crate::util::presence::Presence<crate::device::Device>) -> u32 {
+		let mut dev = crate::commands::unwrap_device_presence(dev);
+		if self.raw {
+			let file = QualFileName::from_str(&self.slot).expect("Invalid filename");
+			dev.execute_file(&file).expect("Running file");
+		} else {
+			let slot = SlotNumber::from_str(&self.slot).expect("Invalid slot number");
+			program::run(&mut dev, slot).expect("Running program");
+		}
+		0
 	}
 }
