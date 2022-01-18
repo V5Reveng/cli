@@ -86,3 +86,8 @@ pub fn remove_all(device: &mut Device) -> DevResult<()> {
 	}
 	Ok(())
 }
+
+pub fn run(device: &mut Device, slot: SlotNumber) -> DevResult<()> {
+	let bin_name = slot_number_to_bin_qual_file(slot);
+	device.execute_file(&bin_name.common)
+}
