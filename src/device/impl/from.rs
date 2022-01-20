@@ -2,7 +2,6 @@ use crate::device::discover::UploadableInfo;
 use crate::device::Device;
 use log::debug;
 use std::path::Path;
-use std::time::Duration;
 
 const SERIAL_BAUD: u32 = 115200;
 
@@ -24,7 +23,7 @@ impl From<UploadableInfo> for Device {
 				.stop_bits(StopBits::One)
 				.data_bits(DataBits::Eight)
 				.flow_control(FlowControl::None)
-				.timeout(Duration::from_secs(1))
+				.timeout(Self::DEFAULT_TIMEOUT)
 				.open()
 				.unwrap()
 				.into(),

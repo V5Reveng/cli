@@ -20,6 +20,9 @@ impl CrcSerialPort {
 	pub fn port(&self) -> &dyn SerialPort {
 		&*self.underlying
 	}
+	pub fn port_mut(&mut self) -> &mut dyn SerialPort {
+		&mut *self.underlying
+	}
 	/// Start calculating the CRC for sent data.
 	/// Use should be paired with `end_tx_crc`.
 	pub fn begin_tx_crc(&mut self) {

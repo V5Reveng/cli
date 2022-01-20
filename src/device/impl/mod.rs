@@ -8,6 +8,7 @@ pub mod public;
 mod receive;
 mod screen_capture;
 mod send;
+mod timeout;
 mod trivial;
 
 type CommandId = u8;
