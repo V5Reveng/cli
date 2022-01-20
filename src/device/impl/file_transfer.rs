@@ -62,7 +62,7 @@ impl Device {
 		const COMMAND_ID: CommandId = 0x13;
 		let amount_to_write: filesystem::PacketSize = data.len().try_into().expect("Buffer is too large to write with ft_write_single");
 		let amount_to_write = pad(amount_to_write);
-		debug!("rx chunk of {} (padded to {}) bytes", data.len(), amount_to_write);
+		debug!("tx chunk of {} (padded to {}) bytes", data.len(), amount_to_write);
 		self.tx_ext_command_header(COMMAND_ID, std::mem::size_of_val(&base_address) + amount_to_write as usize)?;
 		self.tx(&base_address)?;
 		self.tx_raw_data(data)?;
