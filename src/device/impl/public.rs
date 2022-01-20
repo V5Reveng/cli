@@ -136,9 +136,11 @@ impl Device {
 		if let Some(ref linked_file) = args.linked_file {
 			self.ft_set_link(linked_file)?;
 		}
-		// if this doesn't work, try halving the max_packet_size
 		self.ft_write(stream, size, address, transfer_info.max_packet_size)?;
+		// a large file transfer can take a while to end, so set the timeout as such. A 500 KB file would result in a timeout of 10 seconds.
+		self.set_timeout(std::time::Duration::from_millis(std::cmp::max(size / 50, 1000) as u64))?;
 		self.end_file_transfer(args.action)?;
+		self.reset_timeout()?;
 		self.set_transfer_channel(filesystem::Channel::Pit)?;
 		Ok(())
 	}
