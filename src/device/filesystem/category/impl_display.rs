@@ -10,6 +10,7 @@ impl Display for Category {
 			Self::RMS => "rms",
 			Self::PROS => "pros",
 			Self::MW => "mw",
+			Self::REVENG => "reveng",
 			x => {
 				return write!(formatter, "0x{:02x}", x.0);
 			}

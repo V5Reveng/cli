@@ -11,6 +11,7 @@ impl FromStr for Category {
 			"rms" => Ok(Self::RMS),
 			"pros" => Ok(Self::PROS),
 			"mw" => Ok(Self::MW),
+			"reveng" => Ok(Self::REVENG),
 			numeric => Ok(Self(crate::util::num::lenient_u64_from_str(numeric).map_err(|_| Self::Err::UnknownCategory)?.try_into().map_err(|_| Self::Err::TooLarge)?)),
 		}
 	}

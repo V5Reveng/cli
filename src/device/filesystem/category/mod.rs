@@ -21,12 +21,13 @@ impl Category {
 	pub const RMS: Category = Category(16);
 	pub const PROS: Category = Category(24);
 	pub const MW: Category = Category(32);
+	pub const REVENG: Category = Category(48);
 
 	pub const MIN: u8 = u8::MIN;
 	pub const MAX: u8 = u8::MAX;
 
 	pub const fn named() -> &'static [Self] {
-		&[Self::USER, Self::SYSTEM, Self::RMS, Self::PROS, Self::MW]
+		&[Self::USER, Self::SYSTEM, Self::RMS, Self::PROS, Self::MW, Self::REVENG]
 	}
 
 	pub fn is_none(&self) -> bool {
