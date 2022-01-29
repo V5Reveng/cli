@@ -22,6 +22,6 @@ pub struct Device {
 
 impl Debug for Device {
 	fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
-		write!(formatter, "Device of type {} at {}", self.ty, self.port.port().name().unwrap_or_else(|| "(unknown)".to_owned()))
+		write!(formatter, "Device of type {} at {}", self.ty, self.port.port().name().as_deref().unwrap_or("(unknown)"))
 	}
 }

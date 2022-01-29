@@ -1,6 +1,7 @@
 //! The user interface on the command line.
 
 use crate::logging;
+use anyhow::Context;
 use clap::Parser;
 use std::path::PathBuf;
 use v5_device::device::{Device, UploadableInfo};
@@ -12,7 +13,7 @@ mod program;
 
 /// A command that can be run with an arbitrary number of devices present (none, one, or many).
 trait Runnable {
-	fn run(self, device: Presence<Device>) -> u32;
+	fn run(self, device: Presence) -> anyhow::Result<()>;
 }
 
 #[derive(clap::Subcommand)]
@@ -23,7 +24,7 @@ enum Subcommand {
 }
 
 impl Runnable for Subcommand {
-	fn run(self, dev: Presence<Device>) -> u32 {
+	fn run(self, dev: Presence) -> anyhow::Result<()> {
 		match self {
 			Subcommand::Filesystem(args) => args.run(dev),
 			Subcommand::Program(args) => args.run(dev),
@@ -49,24 +50,19 @@ struct Args {
 }
 
 impl Args {
-	fn run(self) -> u32 {
+	fn run(self) -> anyhow::Result<()> {
 		if self.verbosity > 0 {
 			logging::set_from_int(self.verbosity);
 		}
 		let device = if let Some(ref device_path) = self.device_path {
-			Presence::One(Device::try_from(device_path.as_ref()).expect("Invalid device provided"))
+			Presence::One(Device::try_from(device_path.as_ref()).context("Invalid device provided")?)
 		} else {
-			Presence::from(UploadableInfo::get_all().expect("Failed to get serial ports").into_iter().filter_map(|port| Device::try_from(port).ok()).collect::<Vec<Device>>())
+			Presence::from(UploadableInfo::get_all().context("Failed to get serial ports")?.into_iter().filter_map(|port| Device::try_from(port).ok()).collect::<Vec<Device>>())
 		};
 		self.sub.run(device)
 	}
 }
 
-pub fn run() -> u32 {
+pub fn run() -> anyhow::Result<()> {
 	Args::parse().run()
-}
-
-/// Supplies standard messages to the `expect_one` method on a `Presence` instance.
-pub fn unwrap_device_presence(pres: Presence<Device>) -> Device {
-	pres.expect_one("No uploadable devices found.", "Multiple uploadable devices found. You can specify just one with the --device-path argument.")
 }

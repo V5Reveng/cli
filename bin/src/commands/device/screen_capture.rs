@@ -1,4 +1,5 @@
 use crate::commands::Runnable;
+use anyhow::Context;
 use std::fs::File;
 use std::io::stdout;
 use std::io::{self, Write};
@@ -14,16 +15,16 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: v5_device::util::presence::Presence<Device>) -> u32 {
-		let mut dev = crate::commands::unwrap_device_presence(dev);
+	fn run(self, dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
+		let mut dev = dev.as_result()?;
 
 		let stream: Box<dyn Write> = match self.output {
-			Some(ref path) if path.as_os_str() != "-" => Box::new(File::create(path).expect("Creating output file")),
+			Some(ref path) if path.as_os_str() != "-" => Box::new(File::create(path)?),
 			_ => Box::new(stdout()),
 		};
-		let mut stream = ScreenCapturePipeline::new(stream);
-		dev.capture_screen(&mut stream).expect("Capturing screen");
-		0
+		let mut stream = ScreenCapturePipeline::new(stream)?;
+		dev.capture_screen(&mut stream)?;
+		Ok(())
 	}
 }
 
@@ -39,12 +40,12 @@ struct ScreenCapturePipeline {
 }
 
 impl ScreenCapturePipeline {
-	pub fn new(output: Box<dyn std::io::Write>) -> Self {
+	pub fn new(output: Box<dyn std::io::Write>) -> anyhow::Result<Self> {
 		let mut encoder = png::Encoder::new(output, Device::ACTUAL_SCREEN_WIDTH as u32, Device::SCREEN_HEIGHT as u32);
 		encoder.set_color(png::ColorType::Rgb);
 		encoder.set_depth(png::BitDepth::Eight);
-		let output = encoder.write_header().expect("Writing PNG header").into_stream_writer().expect("Converting PNG writer to stream writer");
-		Self { output, current_x: 0 }
+		let output = encoder.write_header().context("Writing PNG header")?.into_stream_writer().context("Converting PNG writer to stream writer")?;
+		Ok(Self { output, current_x: 0 })
 	}
 }
 

@@ -16,3 +16,15 @@ impl From<Error> for UploadableInfoFromPathError {
 		UploadableInfoFromPathError::SerialPortError(e)
 	}
 }
+
+impl std::fmt::Display for UploadableInfoFromPathError {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		match self {
+			Self::PathNotUtf8 => write!(formatter, "Path is not UTF-8"),
+			Self::Nonexistent => write!(formatter, "Path does not exist"),
+			Self::SerialPortError(underlying) => write!(formatter, "Serial port error: {}", underlying),
+			Self::NotValid => write!(formatter, "Path does not refer to a valid Uploadable"),
+		}
+	}
+}
+impl std::error::Error for UploadableInfoFromPathError {}

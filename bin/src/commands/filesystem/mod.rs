@@ -1,5 +1,4 @@
 use crate::commands::Runnable;
-use v5_device::device::Device;
 use v5_device::util::presence::Presence;
 
 mod cat;
@@ -18,7 +17,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: Presence<Device>) -> u32 {
+	fn run(self, dev: Presence) -> anyhow::Result<()> {
 		self.sub.run(dev)
 	}
 }
@@ -37,7 +36,7 @@ enum Commands {
 }
 
 impl Runnable for Commands {
-	fn run(self, dev: Presence<Device>) -> u32 {
+	fn run(self, dev: Presence) -> anyhow::Result<()> {
 		match self {
 			Commands::Cat(args) => args.run(dev),
 			Commands::Edit(args) => args.run(dev),

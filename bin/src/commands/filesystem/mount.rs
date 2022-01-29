@@ -10,7 +10,7 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, _dev: v5_device::util::presence::Presence<v5_device::device::Device>) -> u32 {
+	fn run(self, _dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
 		todo!();
 	}
 }

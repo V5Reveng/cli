@@ -1,4 +1,5 @@
 use crate::commands::Runnable;
+use anyhow::Context;
 use std::collections::HashSet;
 use v5_device::program::{self, SlotNumber};
 
@@ -17,20 +18,19 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: v5_device::util::presence::Presence<v5_device::device::Device>) -> u32 {
-		let mut dev = crate::commands::unwrap_device_presence(dev);
+	fn run(self, dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
+		let mut dev = dev.as_result()?;
 		if self.all {
-			program::remove_all(&mut dev).expect("Removing all programs");
+			program::remove_all(&mut dev).context("Removing all programs")?;
 		} else {
 			let program_slots: HashSet<_> = self.program_slots.into_iter().collect();
 			for program_slot in program_slots {
-				let was_deleted = program::remove(&mut dev, program_slot, false).unwrap_or_else(|_| panic!("Removing slot {}", program_slot));
+				let was_deleted = program::remove(&mut dev, program_slot, false).context(format!("Removing slot {}", program_slot))?;
 				if !self.ignore_empty && !was_deleted {
-					eprintln!("Slot {} is empty", program_slot);
-					return 1;
+					anyhow::bail!("Slot {} is empty", program_slot);
 				}
 			}
 		}
-		0
+		Ok(())
 	}
 }

@@ -9,13 +9,12 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: v5_device::util::presence::Presence<Device>) -> u32 {
-		let mut dev = crate::commands::unwrap_device_presence(dev);
+	fn run(self, dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
+		let mut dev = dev.as_result()?;
 		match self.category {
 			Some(category) => list_in_category(&mut dev, category),
 			None => list_all_categories(&mut dev),
-		};
-		0
+		}
 	}
 }
 
@@ -36,17 +35,19 @@ fn print_file_list(files: &[receive::FileMetadataByIndex]) {
 	}
 }
 
-fn list_in_category(dev: &mut Device, category: fs::Category) {
-	let files = dev.list_all_files(category).unwrap();
+fn list_in_category(dev: &mut Device, category: fs::Category) -> anyhow::Result<()> {
+	let files = dev.list_all_files(category)?;
 	print_file_list(&files);
+	Ok(())
 }
 
 /// List the files in all *named* categories.
-fn list_all_categories(dev: &mut Device) {
+fn list_all_categories(dev: &mut Device) -> anyhow::Result<()> {
 	for &category in fs::Category::named() {
-		let files = dev.list_all_files(category).unwrap();
+		let files = dev.list_all_files(category)?;
 		println!("Category: {}", category);
 		print_file_list(&files);
 		println!();
 	}
+	Ok(())
 }

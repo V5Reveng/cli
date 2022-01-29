@@ -1,4 +1,5 @@
 use crate::commands::Runnable;
+use anyhow::Context;
 use std::str::FromStr;
 use v5_device::device::filesystem::QualFileName;
 use v5_device::program::{self, SlotNumber};
@@ -14,15 +15,15 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: v5_device::util::presence::Presence<v5_device::device::Device>) -> u32 {
-		let mut dev = crate::commands::unwrap_device_presence(dev);
+	fn run(self, dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
+		let mut dev = dev.as_result()?;
 		if self.raw {
-			let file = QualFileName::from_str(&self.slot).expect("Invalid filename");
-			dev.execute_file(&file).expect("Running file");
+			let file = QualFileName::from_str(&self.slot).context("Filename")?;
+			dev.execute_file(&file).context("Running file")?;
 		} else {
-			let slot = SlotNumber::from_str(&self.slot).expect("Invalid slot number");
-			program::run(&mut dev, slot).expect("Running program");
+			let slot = SlotNumber::from_str(&self.slot).context("Slot number")?;
+			program::run(&mut dev, slot).context("Running program")?;
 		}
-		0
+		Ok(())
 	}
 }

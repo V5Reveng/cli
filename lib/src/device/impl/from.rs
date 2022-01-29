@@ -8,15 +8,16 @@ const SERIAL_BAUD: u32 = 115200;
 impl<'a> TryFrom<&'a Path> for Device {
 	type Error = <UploadableInfo as TryFrom<&'a Path>>::Error;
 	fn try_from(path: &'a Path) -> Result<Self, Self::Error> {
-		UploadableInfo::try_from(path).map(Device::from)
+		UploadableInfo::try_from(path).and_then(|info| Device::try_from(info).map_err(Self::Error::SerialPortError))
 	}
 }
 
-impl From<UploadableInfo> for Device {
-	fn from(info: UploadableInfo) -> Self {
+impl TryFrom<UploadableInfo> for Device {
+	type Error = serialport::Error;
+	fn try_from(info: UploadableInfo) -> Result<Self, Self::Error> {
 		use serialport::*;
 		debug!("Opening serial port {} for V5 device of type {:?}", &info.name, &info.device_type);
-		Device {
+		Ok(Device {
 			ty: info.device_type,
 			port: serialport::new(info.name, SERIAL_BAUD)
 				.parity(Parity::None)
@@ -24,9 +25,8 @@ impl From<UploadableInfo> for Device {
 				.data_bits(DataBits::Eight)
 				.flow_control(FlowControl::None)
 				.timeout(Self::DEFAULT_TIMEOUT)
-				.open()
-				.unwrap()
+				.open()?
 				.into(),
-		}
+		})
 	}
 }

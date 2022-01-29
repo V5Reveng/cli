@@ -1,4 +1,5 @@
 use crate::commands::Runnable;
+use anyhow::Context;
 use v5_device::program::{get as get_program, ProgramIni, SlotNumber};
 
 /// Get info for a specific slot.
@@ -9,17 +10,16 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: v5_device::util::presence::Presence<v5_device::device::Device>) -> u32 {
-		let mut dev = crate::commands::unwrap_device_presence(dev);
-		let program = get_program(&mut dev, self.slot).expect("Getting program");
+	fn run(self, dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
+		let mut dev = dev.as_result()?;
+		let program = get_program(&mut dev, self.slot).context("Getting program")?;
 		match program {
 			Some(ref program) => {
 				print_program(program);
-				0
+				Ok(())
 			}
 			None => {
-				eprintln!("Program in slot {} does not exist", self.slot);
-				1
+				anyhow::bail!("Program in slot {} does not exist", self.slot);
 			}
 		}
 	}

@@ -1,8 +1,7 @@
 use crate::commands::Runnable;
-use log::error;
 use std::io::stdout;
 use v5_device::device::filesystem as fs;
-use v5_device::device::{Device, DeviceError, ProtocolError, ResponseByte};
+use v5_device::device::{DeviceError, ProtocolError, ResponseByte};
 
 /// Output the contents of a file.
 ///
@@ -14,18 +13,14 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: v5_device::util::presence::Presence<Device>) -> u32 {
-		let mut dev = crate::commands::unwrap_device_presence(dev);
+	fn run(self, dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
+		let mut dev = dev.as_result()?;
 		let contents = dev.read_file_to_stream(&mut stdout(), &self.file, &fs::ReadArgs { ..Default::default() });
 		match contents {
 			Err(DeviceError::Protocol(ProtocolError::Nack(ResponseByte::ProgramFileError))) => {
-				error!("File does not exist: {}", self.file);
-				1
+				anyhow::bail!("File does not exist");
 			}
-			x => {
-				x.unwrap();
-				0
-			}
+			x => Ok(x?),
 		}
 	}
 }

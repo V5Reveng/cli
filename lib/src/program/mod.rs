@@ -38,16 +38,16 @@ fn slot_number_to_bin_name(number: SlotNumber) -> String {
 	format!("slot_{}.bin", number)
 }
 
-fn slot_number_to_ini_qual_file(number: SlotNumber) -> QualFile {
-	QualFile::from_str(&slot_number_to_ini_name(number)).unwrap()
+fn slot_number_to_ini_qual_file(number: SlotNumber) -> Result<QualFile, fs::QualFileFromStrError> {
+	QualFile::from_str(&slot_number_to_ini_name(number))
 }
 
-fn slot_number_to_bin_qual_file(number: SlotNumber) -> QualFile {
-	QualFile::from_str(&slot_number_to_bin_name(number)).unwrap()
+fn slot_number_to_bin_qual_file(number: SlotNumber) -> Result<QualFile, fs::QualFileFromStrError> {
+	QualFile::from_str(&slot_number_to_bin_name(number))
 }
 
 pub fn get(device: &mut Device, slot: SlotNumber) -> DevResult<Option<ProgramIni>> {
-	let slot = slot_number_to_ini_qual_file(slot);
+	let slot = slot_number_to_ini_qual_file(slot).map_err(|err| DE::Other(Box::new(err)))?;
 	let mut buffer = VecWriter::new();
 	match device.read_file_to_stream(&mut buffer, &slot, &fs::ReadArgs::default()) {
 		Ok(_) => {
@@ -71,8 +71,8 @@ pub fn get_all(device: &mut Device) -> DevResult<Programs> {
 
 /// Returns whether the slot was actually removed.
 pub fn remove(device: &mut Device, slot: SlotNumber, include_linked: bool) -> DevResult<bool> {
-	let ini_name = slot_number_to_ini_qual_file(slot);
-	let bin_name = slot_number_to_bin_qual_file(slot);
+	let ini_name = slot_number_to_ini_qual_file(slot).map_err(|err| DE::Other(Box::new(err)))?;
+	let bin_name = slot_number_to_bin_qual_file(slot).map_err(|err| DE::Other(Box::new(err)))?;
 	let ini_ret = device.delete_file(&ini_name.common, &Default::default())?;
 	let bin_ret = device.delete_file(&bin_name.common, &dev_fs::DeleteArgs { include_linked })?;
 	Ok(ini_ret && bin_ret)
@@ -88,6 +88,6 @@ pub fn remove_all(device: &mut Device) -> DevResult<()> {
 }
 
 pub fn run(device: &mut Device, slot: SlotNumber) -> DevResult<()> {
-	let bin_name = slot_number_to_bin_qual_file(slot);
+	let bin_name = slot_number_to_bin_qual_file(slot).map_err(|err| DE::Other(Box::new(err)))?;
 	device.execute_file(&bin_name.common)
 }

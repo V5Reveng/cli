@@ -6,11 +6,11 @@ use v5_device::device;
 pub struct Args {}
 
 impl Runnable for Args {
-	fn run(self, _dev: v5_device::util::presence::Presence<device::Device>) -> u32 {
-		let devices = device::UploadableInfo::get_all().unwrap();
+	fn run(self, _dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
+		let devices = device::UploadableInfo::get_all()?;
 		for device in devices.iter() {
 			println!("Device {} of type {}", device.name, device.device_type);
 		}
-		0
+		Ok(())
 	}
 }

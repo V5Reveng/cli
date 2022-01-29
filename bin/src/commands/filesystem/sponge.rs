@@ -1,7 +1,8 @@
 use crate::commands::Runnable;
+use anyhow::Context;
 use clap_num::maybe_hex;
 use std::io::{stdin, Read};
-use v5_device::device::{filesystem as fs, Device};
+use v5_device::device::filesystem as fs;
 
 /// Write stdin to a remote file.
 ///
@@ -28,18 +29,17 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: v5_device::util::presence::Presence<Device>) -> u32 {
-		let mut dev = crate::commands::unwrap_device_presence(dev);
+	fn run(self, dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
+		let mut dev = dev.as_result()?;
 		let mut data = Vec::default();
 		// we have to buffer this to have the size and the CRC
-		stdin().read_to_end(&mut data).expect("Could not read from stdin");
+		stdin().read_to_end(&mut data).context("Could not read from stdin")?;
 		let args = fs::WriteArgs {
 			address: self.address,
 			overwrite: self.overwrite,
 			linked_file: self.link,
 			..Default::default()
 		};
-		dev.write_file_from_slice(&data, &self.file, &args).unwrap();
-		0
+		dev.write_file_from_slice(&data, &self.file, &args).context("Writing file")
 	}
 }

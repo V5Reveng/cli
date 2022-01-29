@@ -2,8 +2,7 @@ mod commands;
 mod logging;
 mod util;
 
-fn main() {
+fn main() -> anyhow::Result<()> {
 	logging::init();
-	let exit_code = commands::run();
-	std::process::exit(exit_code as i32);
+	commands::run()
 }

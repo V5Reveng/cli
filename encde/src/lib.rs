@@ -80,6 +80,21 @@ pub enum Error {
 	/// A dynamic custom error
 	CustomString(String),
 }
+
+impl std::fmt::Display for Error {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		match self {
+			Self::IO(e) => write!(formatter, "IO error: {}", e),
+			Self::UnexpectedLength { expected, actual } => write!(formatter, "Length ({}) did not match expected ({})", actual, expected),
+			Self::UnrecognizedEnumDiscriminant { enum_name, expected, actual } => write!(formatter, "Unrecognized enum discriminant {} for enum {}; expected one of {:?}", actual, enum_name, expected),
+			Self::InvalidFormat { format_name } => write!(formatter, "Invalid format for {}", format_name),
+			Self::Custom(message) => formatter.write_str(message),
+			Self::CustomString(message) => formatter.write_str(message),
+		}
+	}
+}
+impl std::error::Error for Error {}
+
 impl From<io::Error> for Error {
 	fn from(e: io::Error) -> Self {
 		Self::IO(e)

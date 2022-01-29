@@ -1,4 +1,5 @@
 use crate::commands::Runnable;
+use anyhow::Context;
 use v5_device::program;
 
 /// List uploaded programs.
@@ -9,11 +10,11 @@ pub struct Args {
 }
 
 impl Runnable for Args {
-	fn run(self, dev: v5_device::util::presence::Presence<v5_device::device::Device>) -> u32 {
-		let mut dev = crate::commands::unwrap_device_presence(dev);
-		let programs = program::get_all(&mut dev).expect("Getting program list");
+	fn run(self, dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
+		let mut dev = dev.as_result()?;
+		let programs = program::get_all(&mut dev).context("Getting program list")?;
 		for (idx, program) in programs.iter().enumerate() {
-			let idx = program::SlotNumber::from_index(idx).unwrap();
+			let idx = program::SlotNumber::from_index(idx)?;
 			match program.as_ref() {
 				Some(program) => {
 					println!("Slot {}: {}", idx, program.name);
@@ -24,6 +25,6 @@ impl Runnable for Args {
 				None => (),
 			}
 		}
-		0
+		Ok(())
 	}
 }

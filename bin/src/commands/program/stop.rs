@@ -1,13 +1,13 @@
 use crate::commands::Runnable;
+use anyhow::Context;
 
 /// Stop the running program.
 #[derive(clap::Parser)]
 pub struct Args {}
 
 impl Runnable for Args {
-	fn run(self, dev: v5_device::util::presence::Presence<v5_device::device::Device>) -> u32 {
-		let mut dev = crate::commands::unwrap_device_presence(dev);
-		dev.stop_execution().expect("Stopping execution");
-		0
+	fn run(self, dev: v5_device::util::presence::Presence) -> anyhow::Result<()> {
+		let mut dev = dev.as_result()?;
+		dev.stop_execution().context("Stopping execution")
 	}
 }

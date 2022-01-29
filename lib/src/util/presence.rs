@@ -1,16 +1,14 @@
-//! The Presence enum, for reasoning about the existence of things.
-//!
-//! Presence represents the existence of none, one, or many of a thing.
+use crate::device::Device;
 
 #[derive(Debug)]
-pub enum Presence<T> {
+pub enum Presence {
 	None,
-	One(T),
-	Many(Vec<T>),
+	One(Device),
+	Many(Vec<Device>),
 }
 
-impl<T> From<Vec<T>> for Presence<T> {
-	fn from(mut items: Vec<T>) -> Self {
+impl From<Vec<Device>> for Presence {
+	fn from(mut items: Vec<Device>) -> Self {
 		match items.len() {
 			0 => Self::None,
 			1 => Self::One(items.pop().unwrap()),
@@ -19,8 +17,8 @@ impl<T> From<Vec<T>> for Presence<T> {
 	}
 }
 
-impl<T> From<Option<T>> for Presence<T> {
-	fn from(opt: Option<T>) -> Self {
+impl From<Option<Device>> for Presence {
+	fn from(opt: Option<Device>) -> Self {
 		match opt {
 			None => Self::None,
 			Some(x) => Self::One(x),
@@ -29,27 +27,28 @@ impl<T> From<Option<T>> for Presence<T> {
 }
 
 #[derive(Debug)]
-pub enum NotOne<T> {
+pub enum NotOne {
 	None,
-	Many(Vec<T>),
+	Many,
 }
 
-impl<T> From<Presence<T>> for Result<T, NotOne<T>> {
-	fn from(pres: Presence<T>) -> Self {
-		match pres {
-			Presence::<T>::None => Err(NotOne::<T>::None),
-			Presence::<T>::One(item) => Ok(item),
-			Presence::<T>::Many(items) => Err(NotOne::<T>::Many(items)),
-		}
+impl std::fmt::Display for NotOne {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let s = match self {
+			Self::None => "No uploadable devices were found.",
+			Self::Many => "Multiple uploadable devices were found. You can list devices with the `device list` command, and specify the device with `--device`.",
+		};
+		formatter.write_str(s)
 	}
 }
+impl std::error::Error for NotOne {}
 
-impl<T> Presence<T> {
-	pub fn expect_one(self, none_message: &'static str, many_message: &'static str) -> T {
+impl Presence {
+	pub fn as_result(self) -> Result<Device, NotOne> {
 		match self {
-			Self::None => panic!("{}", none_message),
-			Self::One(item) => item,
-			Self::Many(_) => panic!("{}", many_message),
+			Self::None => Err(NotOne::None),
+			Self::One(item) => Ok(item),
+			Self::Many(_) => Err(NotOne::Many),
 		}
 	}
 }
