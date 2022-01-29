@@ -1,28 +1,2 @@
-[package]
-name = "reveng-cli"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-chrono = "0.4.19"
-clap = { version = "3.0.5", features = [
-	"derive",
-	"cargo",
-	"unicode",
-	"std",
-	"suggestions",
-], default_features = false }
-clap-num = "1.0.0"
-encde = { path = "encde", features = ["derive"] }
-log = "0.4.14"
-phf = { version = "0.10", features = ["macros"] }
-png = "0.17.2"
-rand = "0.8.4"
-serialport = "4.0.1"
-serde = { version = "1.0.133", features = ["derive"] }
-serde_ini = "0.2.0"
-
-[features]
-
 [workspace]
-members = [".", "encde", "encde/derive"]
+members = ["lib", "bin", "encde", "encde/derive", "encde/derive_test"]

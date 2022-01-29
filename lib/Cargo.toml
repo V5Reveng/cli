@@ -1,0 +1,14 @@
+[package]
+name = "v5_device"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = "0.4.19"
+encde = { path = "../encde", features = ["derive"] }
+log = "0.4.14"
+serialport = "4.0.1"
+serde = { version = "1.0.133", features = ["derive"] }
+serde_ini = "0.2.0"
+
+[features]
