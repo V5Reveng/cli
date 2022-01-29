@@ -29,12 +29,27 @@ impl Log for SimpleLogger {
 		eprintln!(
 			"[{time:0>7.3}][{level: >5}][{path: <16}]  {content}",
 			time = time.as_secs_f64(),
-			level = record.level(),
+			level = ColorizedLevel(record.level()),
 			path = record.module_path().unwrap_or(""),
 			content = record.args()
 		);
 	}
 	fn flush(&self) {
 		let _ = std::io::stderr().flush();
+	}
+}
+
+struct ColorizedLevel(Level);
+impl std::fmt::Display for ColorizedLevel {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		use colored::Colorize;
+		let s = match self.0 {
+			Level::Trace => "trace".white(),
+			Level::Debug => "debug".normal(),
+			Level::Info => "info".blue().bold(),
+			Level::Warn => "warn".yellow().bold(),
+			Level::Error => "error".red().bold(),
+		};
+		write!(formatter, "{}", s)
 	}
 }

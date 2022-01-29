@@ -12,6 +12,7 @@ clap = { version = "3.0.5", features = [
 	"suggestions",
 ], default_features = false }
 clap-num = "1.0.0"
+colored = "2.0.0"
 lazy_static = "1.4.0"
 log = "0.4.14"
 phf = { version = "0.10", features = ["macros"] }
