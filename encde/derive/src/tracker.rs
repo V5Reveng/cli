@@ -79,7 +79,7 @@ impl syn::parse::Parse for UnknownSignInt {
 	fn parse(stream: syn::parse::ParseStream) -> syn::parse::Result<Self> {
 		if stream.peek(Token![-]) {
 			stream.parse::<Token![-]>()?;
-			Ok(Self::Signed(stream.parse::<syn::LitInt>()?.base10_parse()?))
+			Ok(Self::Signed(-stream.parse::<syn::LitInt>()?.base10_parse()?))
 		} else {
 			Ok(Self::Unsigned(stream.parse::<syn::LitInt>()?.base10_parse()?))
 		}
