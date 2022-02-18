@@ -130,10 +130,11 @@ impl<T: Encode, const N: usize> Encode for [T; N] {
 		Ok(())
 	}
 }
-impl<T: Decode, const N: usize> Decode for [T; N] {
+impl<T: Decode + Copy, const N: usize> Decode for [T; N] {
 	fn decode(reader: &mut dyn Read) -> Result<Self> {
 		unsafe {
 			#![allow(clippy::uninit_assumed_init)]
+			// SAFETY: The concern here is that assuming the slice is initialized will lead to the `Drop` implementation receiving an uninitialized `T` if we return early inside the read loop. However, `T` is `Copy`, so it can't have a `Drop` implementation.
 			let mut ret: [T; N] = std::mem::MaybeUninit::uninit().assume_init();
 			for item in ret.iter_mut() {
 				std::ptr::write(item, T::decode(reader)?);
